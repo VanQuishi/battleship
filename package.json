@@ -1,0 +1,23 @@
+{
+  "name": "battleship",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "watch": "jest --watch *.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VanQuishi/battleship.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/VanQuishi/battleship/issues"
+  },
+  "homepage": "https://github.com/VanQuishi/battleship#readme",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
