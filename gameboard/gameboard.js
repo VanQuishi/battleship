@@ -34,4 +34,4 @@ class Gameboard {
   }
 }
 
-module.exports = Gameboard
+export {Gameboard};

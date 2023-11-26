@@ -1,5 +1,5 @@
-const Gameboard = require('./gameboard');
-const Ship = require('../ship/ship');
+import { Gameboard } from './gameboard';
+import { Ship } from '../ship/ship';
 jest.mock('../ship/ship');
 
 var gb;

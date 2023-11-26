@@ -1,5 +1,5 @@
-const Player = require('./player');
-const Gameboard = require('../gameboard/gameboard');
+import { Player } from './player';
+import { Gameboard } from '../gameboard/gameboard';
 jest.mock('../gameboard/gameboard');
 
 var player;
