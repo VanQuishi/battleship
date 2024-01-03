@@ -3,6 +3,7 @@ import {Gameboard} from './gameboard/gameboard.js';
 import {Ship} from './ship/ship.js';
 
 const boardsWrapper = document.getElementById('boardsWrapper');
+const boards = document.getElementsByClassName('board');
 
 const boardWidth = 10;
 
@@ -40,28 +41,40 @@ var __2cShip2 = new Ship(2);
 var __2cShip3 = new Ship(2);
 var __2cShip4 = new Ship(2);
 
-function renderEmptyBoard() {
-  var table = document.createElement('table');
-  var tbody = document.createElement('tbody');
-
-  table.setAttribute("cellspacing", "0");
-  table.setAttribute("cellpadding", "0");
-
-  for (let i = 0; i < boardWidth; i++) {
-    let tr = document.createElement('tr');
-    tr.className = "boardRow";
-    for (let j = 0; j < boardWidth; j++) {
-      let td = document.createElement('td');
-      td.className = "boardCell";
-      tr.appendChild(td);
-    }
-    tbody.appendChild(tr);
+function makeGrid() {
+  for (let j = 0; j < boards.length; j++) {
+    boards[j].style.setProperty('--grid-rows', boardWidth);
+    boards[j].style.setProperty('--grid-cols', boardWidth);
   }
 
-  table.appendChild(tbody);
-  table.className = "board";
+  // Create 2 boards. Assign xy coordinate to the cells' ids
+  for (let j = 0; j < boards.length; j++) {
+    for (let i = 0; i < boardWidth; i++) {
+      for (let k = 0; k < boardWidth; k++) {
+        let gridItem = document.createElement('div');
+        gridItem.id = `${j}-${i}${k}`;
+        gridItem.classList.add('cell');
+        boards[j].appendChild(gridItem);
+      }
+    }
+  }
+}
 
-  return table;
+function displayShips(user, gameboard) {
+  //console.log(gameboard.board);
+  let boardPrefix = user == 'human' ? '0' : '1';
+
+  for (let x = 0; x < boardWidth; x++) {
+    for (let y = 0; y < boardWidth; y++) {
+      console.log(gameboard.board[x][y].ship)
+      if (gameboard.board[x][y].ship != null) {
+        let cellID = `${boardPrefix}-${x}${y}`;
+        console.log({cellID});
+        let cell = document.getElementById(cellID);
+        cell.classList.add('chosenCell');
+      }
+    }
+  }
 }
 
 function gameLoop() {
@@ -106,11 +119,11 @@ function gameLoop() {
   gbPC.placeShip(__2cShip4, [[0,7], [1,7]]);
 
   //render boards - TODO
-  console.log(boardsWrapper)
-  var emptyBoard1 = renderEmptyBoard();
-  var emptyBoard2 = renderEmptyBoard();
-  boardsWrapper.appendChild(emptyBoard1);
-  boardsWrapper.appendChild(emptyBoard2);
+  //console.log(boardsWrapper)
+  makeGrid();
+  displayShips('human', gbHuman);
+
+  //TODO - display ships on board
 
 
   //loop turn by turn for each player

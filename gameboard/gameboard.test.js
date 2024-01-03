@@ -17,8 +17,9 @@ describe('gameboard object', () => {
   test('has board field created with 100 cells', () => {
     const arr = [];
     for (let x = 0; x < 100; x++) {
+      arr[x] = [];
       for (let y = 0; y < 100; y++) {
-        arr[x,y] = {ship: null, isHit: false};
+        arr[x][y] = {ship: null, isHit: false};
       }
     }
   
@@ -27,7 +28,9 @@ describe('gameboard object', () => {
 
   test('has all cells that have never been hit yet as default', () => {
     for (let i = 0; i < gb.board.length; i++) {
-      expect(gb.board[i].isHit).toBe(false);
+      for (let j = 0; j < gb.board.length; j++) {
+        expect(gb.board[i][j].isHit).toBe(false);
+      }
     }
   });
 
@@ -46,9 +49,9 @@ describe('placeShip()', () => {
   });
   
   test('places ship obj at a specified location', () => {   
-    expect(gb.board[0,0]).toBe(ship);
-    expect(gb.board[0,1]).toBe(ship);
-    expect(gb.board[0,2]).toBe(ship);
+    expect(gb.board[0][0].ship).toBe(ship);
+    expect(gb.board[0][1].ship).toBe(ship);
+    expect(gb.board[0][2].ship).toBe(ship);
   });
 
   test('increases aliveShips field by 1', () => {
@@ -67,7 +70,7 @@ describe('receiveAttack()', () => {
 
     mockShipInstance = Ship.mock.instances[0];
     mockHit = mockShipInstance.hit;
-    gb.board[0,0].ship = mockShipInstance;
+    gb.board[0][0].ship = mockShipInstance;
   });
 
   test('calls ship.hit() when it\'s a hit', () => {
@@ -84,7 +87,7 @@ describe('receiveAttack()', () => {
     gb.aliveShips = 1;
 
     const mockIsSunk = mockShipInstance.isSunk.mockReturnValue(true);
-    gb.board[0,0].ship = mockShipInstance;
+    gb.board[0][0].ship = mockShipInstance;
 
     gb.receiveAttack([0,0]);
     expect(mockIsSunk).toHaveBeenCalled();
@@ -95,9 +98,9 @@ describe('receiveAttack()', () => {
     //set aliveShips to 1
     gb.aliveShips = 1;
 
-    gb.board[0,0].ship = mockShipInstance;
+    gb.board[0][0].ship = mockShipInstance;
     mockIsSunk = mockShipInstance.isSunk.mockReturnValue(false);
-    gb.board[0,0].ship = mockShipInstance;
+    gb.board[0][0].ship = mockShipInstance;
 
     gb.receiveAttack([0,0]);
     expect(mockIsSunk).toHaveBeenCalled();
