@@ -21,6 +21,8 @@ class Gameboard {
   receiveAttack(location) {
     let x = location[0];
     let y = location[1];
+    this.board[x][y].isHit = true;
+    
     if (this.board[x][y].ship != null) {
       this.board[x][y].ship.hit();
     } 

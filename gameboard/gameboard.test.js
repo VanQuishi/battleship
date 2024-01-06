@@ -73,6 +73,11 @@ describe('receiveAttack()', () => {
     gb.board[0][0].ship = mockShipInstance;
   });
 
+  test('set the location\'s isHit to true', () => {
+    gb.receiveAttack([0,0]);
+    expect(gb.board[0][0].isHit).toBe(true);
+  })
+
   test('calls ship.hit() when it\'s a hit', () => {
     gb.receiveAttack([0,0]);
     expect(mockHit).toHaveBeenCalled();

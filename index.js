@@ -9,6 +9,8 @@ const boardWidth = 10;
 
 const playerHuman = new Player('Nin');
 const playerPC = new Player('Bot');
+const playerHumanPrefix = '0';
+const playerPCPrefix = '1';
 
 const gbHuman = new Gameboard();
 const gbPC = new Gameboard();
@@ -62,19 +64,37 @@ function makeGrid() {
 
 function displayShips(user, gameboard) {
   //console.log(gameboard.board);
-  let boardPrefix = user == 'human' ? '0' : '1';
 
   for (let x = 0; x < boardWidth; x++) {
     for (let y = 0; y < boardWidth; y++) {
       console.log(gameboard.board[x][y].ship)
       if (gameboard.board[x][y].ship != null) {
-        let cellID = `${boardPrefix}-${x}${y}`;
+        let cellID = `${user}-${x}${y}`;
         console.log({cellID});
         let cell = document.getElementById(cellID);
         cell.classList.add('chosenCell');
       }
     }
   }
+}
+
+function hitACell(cell) {
+  let idArr = cell.id.split('');
+  let x = idArr[2];
+  let y = idArr[3];
+
+  let gb = idArr[0] == playerHumanPrefix ? gbHuman : gbPC;
+
+  gb.receiveAttack([x, y]);
+  console.log(gb.board[x][y].isHit);
+
+  console.log("a cell is hit", x, y);
+  if (cell.classList.contains('chosenCell')) {
+    cell
+    cell.classList.add('hitCell');
+  } else {
+    cell.classList.add('missedCell');
+  } 
 }
 
 function gameLoop() {
@@ -121,10 +141,16 @@ function gameLoop() {
   //render boards - TODO
   //console.log(boardsWrapper)
   makeGrid();
-  displayShips('human', gbHuman);
+  //display ships on board - Done
+  displayShips(playerHumanPrefix, gbHuman);
 
-  //TODO - display ships on board
-
+  //call hitACell when onlick for a cell
+  const cells = document.getElementsByClassName('cell');
+  for (let i = 0; i < cells.length; i++) {
+    cells[i].addEventListener("click", () => {
+      hitACell(cells[i]);
+    })
+  }
 
   //loop turn by turn for each player
   /* do {
