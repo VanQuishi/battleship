@@ -1,9 +1,9 @@
-import { Ship } from './ship';
+import { Ship, hori, verti } from './ship';
 
 var shipObj;
 
 beforeEach(() => {
-  shipObj = new Ship(3);
+  shipObj = new Ship(3, hori);
 });
 
 describe('ship object', () => {
@@ -38,3 +38,34 @@ describe('isSunk()', () => {
     expect(shipObj.isSunk()).toBe(true);
   });
 });
+
+describe('findNonPlaceableCells()', () => {
+  test('findNonPlaceableCells() for horizontal ship', () => {
+    let expectedNonPlaceableCells = [[2,0], [2,1], [2,2], [2,3], [3,3], [4,3], [4,2], [4,1], [4,0]];
+    shipObj.axial = hori;
+    shipObj.locations = [[3,0], [3,1], [3,2]];
+    shipObj.findNonPlaceableCells();
+
+    //expect([[0,1],2]).toEqual(expect.arrayContaining([[0,1],3]))
+    expect(shipObj.nonPlaceableCells).toEqual(expect.arrayContaining(expectedNonPlaceableCells));
+
+    /* let i = 0;
+    do {
+      expect(shipObj.nonPlaceableCells).toContainEqual(expectedNonPlaceableCells[i]);
+      i = i + 1;
+    } while (i < shipObj.nonPlaceableCells.length); */
+  });
+
+  /* test('findNonPlaceableCells() for vertical ship', () => {
+    let expectedNonPlaceableCells = [[0,1], [1,1], [2,1], [2,0]];
+    shipObj.axial = verti;
+    shipObj.locations = [[0,0], [1,0]];
+    shipObj.findNonPlaceableCells();
+
+    let i = 0;
+    do {
+      expect(expectedNonPlaceableCells).toContain(shipObj.nonPlaceableCells[i]);
+      i = i + 1;
+    } while (i < shipObj.nonPlaceableCells.length);
+  }); */
+})

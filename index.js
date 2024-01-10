@@ -43,6 +43,14 @@ var __2cShip2 = new Ship(2);
 var __2cShip3 = new Ship(2);
 var __2cShip4 = new Ship(2);
 
+function checkValidLocation(x,y) {
+  if (0 <= x && x <= 9 && 0 <= y && y <= 9) {
+    return true;
+  }
+
+  return false;
+}
+
 function makeGrid() {
   for (let j = 0; j < boards.length; j++) {
     boards[j].style.setProperty('--grid-rows', boardWidth);
@@ -72,10 +80,25 @@ function displayShips(user, gameboard) {
         let cellID = `${user}-${x}${y}`;
         console.log({cellID});
         let cell = document.getElementById(cellID);
-        cell.classList.add('chosenCell');
+
+        // only display the user's ships. hide the bot's
+        if (user == playerHumanPrefix) {
+          cell.classList.add('chosenCell');
+        }      
       }
     }
   }
+}
+
+function findNonPlaceableCells(locationsArr) {
+  let x = 0;
+  let y = 0;
+  let nonPlaceableCells = [];
+  /* for (let i = 0; i < locationsArr.length; i++) {
+    if (i == 0) {
+      x
+    }
+  } */
 }
 
 function hitACell(cell) {
@@ -86,15 +109,19 @@ function hitACell(cell) {
   let gb = idArr[0] == playerHumanPrefix ? gbHuman : gbPC;
 
   gb.receiveAttack([x, y]);
-  console.log(gb.board[x][y].isHit);
 
-  console.log("a cell is hit", x, y);
-  if (cell.classList.contains('chosenCell')) {
-    cell
+  if (gb.board[x][y].ship != null) {
     cell.classList.add('hitCell');
   } else {
     cell.classList.add('missedCell');
   } 
+
+  console.log(gb.board[x][y].ship.isSunk())
+
+  if (gb.board[x][y].ship.isSunk()) {
+    console.log('sunk')
+    findNonPlaceableCells(gb.board[x][y].ship.locations)
+  }
 }
 
 function gameLoop() {

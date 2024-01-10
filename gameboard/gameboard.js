@@ -12,6 +12,7 @@ class Gameboard {
   }
 
   placeShip(ship, locationArr) {
+    ship.locations = locationArr;
     for (let i = 0; i < locationArr.length; i++) {
       this.board[locationArr[i][0]][locationArr[i][1]] = {ship: ship, isHit: false};
     }
@@ -24,7 +25,7 @@ class Gameboard {
     this.board[x][y].isHit = true;
     
     if (this.board[x][y].ship != null) {
-      this.board[x][y].ship.hit();
+      this.board[x][y].ship.hit(1);
     } 
 
     if (this.board[x][y].ship != null && this.board[x][y].ship.isSunk()) {
