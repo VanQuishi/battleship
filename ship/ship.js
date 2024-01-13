@@ -35,8 +35,8 @@ class Ship {
       // first cell
       if (i == 0) {
         if (this.axial == hori) {
-          x = this.locations[i][0] - 1;
-          y = this.locations[i][1];
+          x = this.locations[i][0];
+          y = this.locations[i][1] - 1;
           if (this.checkValidLocation(x,y)) {
             this.nonPlaceableCells.push([x,y]);
           }      
@@ -50,26 +50,8 @@ class Ship {
         }
       }
 
-      // last cell
-      else if (i == this.locations.length - 1) {
-        if (this.axial == hori) {
-          x = this.locations[i][0] + 1;
-          y = this.locations[i][1];
-          if (this.checkValidLocation(x,y)) {
-            this.nonPlaceableCells.push([x,y]);
-          }     
-        }
-        else {
-          x = this.locations[i][0];
-          y = this.locations[i][1] + 1;
-          if (this.checkValidLocation(x,y)) {
-            this.nonPlaceableCells.push([x,y]);
-          }     
-        }
-      }
-
-      // find nonPlaceableCells in a four corner
-      if (this.axial == hori) {
+      // find nonPlaceableCells in a four corner for all cells except last cell
+      if (this.axial == hori && (i != this.locations.length - 1)) {
         // top-left corner
         x = this.locations[i][0] - 1;
         y = this.locations[i][1] - 1;
@@ -78,15 +60,15 @@ class Ship {
         }     
 
         // top-right corner
-        x = this.locations[i][0] + 1;
-        y = this.locations[i][1] - 1;
+        x = this.locations[i][0] - 1;
+        y = this.locations[i][1] + 1;
         if (this.checkValidLocation(x,y)) {
           this.nonPlaceableCells.push([x,y]);
         }     
 
         // bottom-left corner
-        x = this.locations[i][0] - 1;
-        y = this.locations[i][1] + 1;
+        x = this.locations[i][0] + 1;
+        y = this.locations[i][1] - 1;
         if (this.checkValidLocation(x,y)) {
           this.nonPlaceableCells.push([x,y]);
         }    
@@ -97,6 +79,38 @@ class Ship {
         if (this.checkValidLocation(x,y)) {
           this.nonPlaceableCells.push([x,y]);
         }    
+      }
+
+      // last cell
+      if (i == (this.locations.length - 1)) {
+        if (this.axial == hori) {
+          x = this.locations[i][0];
+          y = this.locations[i][1] + 1;
+          if (this.checkValidLocation(x,y)) {
+            this.nonPlaceableCells.push([x,y]);
+          }     
+
+          // top-right corner
+          x = this.locations[i][0] + 1;
+          y = this.locations[i][1] - 1;
+          if (this.checkValidLocation(x,y)) {
+            this.nonPlaceableCells.push([x,y]);
+          }    
+
+          // bottom-right corner
+          x = this.locations[i][0] + 1;
+          y = this.locations[i][1] + 1;
+          if (this.checkValidLocation(x,y)) {
+            this.nonPlaceableCells.push([x,y]);
+          }    
+        }
+        else {
+          x = this.locations[i][0];
+          y = this.locations[i][1] + 1;
+          if (this.checkValidLocation(x,y)) {
+            this.nonPlaceableCells.push([x,y]);
+          }     
+        }
       }
     }
   }
