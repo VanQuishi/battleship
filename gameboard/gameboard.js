@@ -16,7 +16,6 @@ class Gameboard {
     for (let i = 0; i < locationArr.length; i++) {
       this.board[locationArr[i][0]][locationArr[i][1]] = {ship: ship, isHit: false};
     }
-    this.board[locationArr[0][0]][locationArr[0][1]].ship.findNonPlaceableCells();
     this.aliveShips++;
   }
 

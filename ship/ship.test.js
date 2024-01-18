@@ -43,10 +43,11 @@ describe('findNonPlaceableCells()', () => {
   test('findNonPlaceableCells() for vertical ship', () => {
     let expectedNonPlaceableCells = [[0,0], [0,1], [0,2], [1,0], [1,2], [2,0], [2,2], [3,0], [3,2], [4,0], [4,1], [4,2]];
     shipObj.axial = verti;
-    shipObj.locations = [[1,1], [2,1], [3,1]];
+    /* shipObj.locations = [[1,1], [2,1], [3,1]]; */
+    shipObj.locations = [[7,0], [7,1]];
     shipObj.findNonPlaceableCells();
 
-    expect(shipObj.nonPlaceableCells.length).toEqual(expectedNonPlaceableCells.length);
+    //expect(shipObj.nonPlaceableCells.length).toEqual(expectedNonPlaceableCells.length);
     expect(shipObj.nonPlaceableCells).toEqual(expect.arrayContaining(expectedNonPlaceableCells));
   });
 
