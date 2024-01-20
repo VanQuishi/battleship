@@ -34,7 +34,7 @@ class Ship {
     for (let i = 0; i < this.locations.length; i++) {
       // first cell
       if (i == 0) {
-        if (this.axial == hori) {
+        if (this.axial == verti) {
           x = this.locations[i][0];
           y = this.locations[i][1] - 1;
           if (this.checkValidLocation(x,y)) {
@@ -50,40 +50,9 @@ class Ship {
         }
       }
 
-      // find nonPlaceableCells in a four corner for all cells except last cell
-      if (i != this.locations.length - 1) {
-        // top-left corner
-        x = this.locations[i][0] - 1;
-        y = this.locations[i][1] - 1;
-        if (this.checkValidLocation(x,y)) {
-          this.nonPlaceableCells.push([x,y]);
-        }     
-
-        // top-right corner
-        x = this.locations[i][0] - 1;
-        y = this.locations[i][1] + 1;
-        if (this.checkValidLocation(x,y)) {
-          this.nonPlaceableCells.push([x,y]);
-        }     
-
-        // bottom-left corner
-        x = this.locations[i][0] + 1;
-        y = this.locations[i][1] - 1;
-        if (this.checkValidLocation(x,y)) {
-          this.nonPlaceableCells.push([x,y]);
-        }    
-
-        // bottom-right corner
-        x = this.locations[i][0] + 1;
-        y = this.locations[i][1] + 1;
-        if (this.checkValidLocation(x,y)) {
-          this.nonPlaceableCells.push([x,y]);
-        }    
-      }
-
       // last cell
       if (i == (this.locations.length - 1)) {
-        if (this.axial == hori) {
+        if (this.axial == verti) {
           x = this.locations[i][0];
           y = this.locations[i][1] + 1;
           if (this.checkValidLocation(x,y)) {
@@ -98,9 +67,40 @@ class Ship {
           }     
         }
 
-        // top-right corner OR bottom-left corner (for verti)
+/*         // top-right corner OR bottom-left corner (for verti)
         x = this.locations[i][0] + 1;
         y = this.locations[i][1] - 1;
+        if (this.checkValidLocation(x,y)) {
+          this.nonPlaceableCells.push([x,y]);
+        }    
+
+        // bottom-right corner
+        x = this.locations[i][0] + 1;
+        y = this.locations[i][1] + 1;
+        if (this.checkValidLocation(x,y)) {
+          this.nonPlaceableCells.push([x,y]);
+        }    */ 
+      }
+
+      // find nonPlaceableCells in a four corner for all cells except last cell
+      if (true) {
+        // top-left corner
+        x = this.locations[i][0] - 1;
+        y = this.locations[i][1] - 1;
+        if (this.checkValidLocation(x,y)) {
+          this.nonPlaceableCells.push([x,y]);
+        }     
+
+        // top-right corner
+        x = this.locations[i][0] + 1;
+        y = this.locations[i][1] - 1;
+        if (this.checkValidLocation(x,y)) {
+          this.nonPlaceableCells.push([x,y]);
+        }     
+
+        // bottom-left corner
+        x = this.locations[i][0] - 1;
+        y = this.locations[i][1] + 1;
         if (this.checkValidLocation(x,y)) {
           this.nonPlaceableCells.push([x,y]);
         }    
