@@ -4,6 +4,8 @@ import {Ship, hori, verti} from './ship/ship.js';
 
 const boardsWrapper = document.getElementById('boardsWrapper');
 const boards = document.getElementsByClassName('board');
+const humanBoard = document.getElementById('humanBoard');
+const pcBoard = document.getElementById('pcBoard');
 
 const boardWidth = 10;
 
@@ -29,7 +31,7 @@ var _2cShip2 = new Ship(2, hori);
 var _2cShip3 = new Ship(2, verti);
 var _2cShip4 = new Ship(2, verti);
 
-var __5cShip = new Ship(5, verti);
+var __5cShip = new Ship(5, hori);
 
 var __4cShip1 = new Ship(4, hori);
 var __4cShip2 = new Ship(4, verti);
@@ -56,6 +58,11 @@ function makeGrid() {
         let gridItem = document.createElement('div');
         gridItem.id = `${j}-${k}${i}`;
         gridItem.classList.add('cell');
+        if (j == playerHumanPrefix) {
+          gridItem.classList.add('humanCell');
+        } else {
+          gridItem.classList.add('pcCell');
+        }
         boards[j].appendChild(gridItem);
       }
     }
@@ -92,6 +99,10 @@ function displayNonPlaceableCells(user, ship) {
 }
 
 function hitACell(cell) {
+  if (cell.classList.contains('hitCell') || cell.classList.contains('missedCell')) {
+    return false;
+  }
+
   let idArr = cell.id.split('');
   let x = idArr[2];
   let y = idArr[3];
@@ -112,9 +123,26 @@ function hitACell(cell) {
   } else {
     cell.classList.add('missedCell');
   } 
+
+  return true;
 }
 
-function gameLoop() {
+function checkForWinner() {
+  if (gbPC.areAllShipsSunk()) {
+    //announce human won
+    console.log("PC won");
+    return true;
+  }
+  if (gbHuman.areAllShipsSunk()) {
+    //announce human won
+    console.log("PC won");
+    return true;
+  }
+
+  return false;
+}
+
+function setup() {
   //preset gameboardHuman
   gbHuman.placeShip(_5cShip, [[4,9], [5,9], [6,9], [7,9], [8,9]]);
   _5cShip.findNonPlaceableCells();
@@ -141,50 +169,79 @@ function gameLoop() {
   _2cShip4.findNonPlaceableCells();
 
   //preset gameboardPC
-  gbPC.placeShip(__5cShip, [[4,9], [5,9], [6,9], [7,9], [8,9], [9,9]]);
+  gbPC.placeShip(__5cShip, [[4,9], [5,9], [6,9], [7,9], [8,9]]);
+  __5cShip.findNonPlaceableCells();
 
   gbPC.placeShip(__4cShip1, [[6,0], [7,0], [8,0], [9,0]]);
+  __4cShip1.findNonPlaceableCells();
   gbPC.placeShip(__4cShip2, [[0,2], [0,3], [0,4], [0,5]]);
+  __4cShip2.findNonPlaceableCells();
 
   gbPC.placeShip(__3cShip1, [[3,0], [3,1], [3,2]]);
+  __3cShip1.findNonPlaceableCells();
   gbPC.placeShip(__3cShip2, [[5,2], [6,2], [7,2]]);
+  __3cShip2.findNonPlaceableCells();
   gbPC.placeShip(__3cShip3, [[9,5], [9,6], [9,7]]);
+  __3cShip3.findNonPlaceableCells();
 
   gbPC.placeShip(__2cShip1, [[0,0], [1,0]]);
+  __2cShip1.findNonPlaceableCells();
   gbPC.placeShip(__2cShip2, [[0, 7], [1,7]]);
+  __2cShip2.findNonPlaceableCells();
   gbPC.placeShip(__2cShip3, [[5,5], [5,6]]);
+  __2cShip3.findNonPlaceableCells();
   gbPC.placeShip(__2cShip4, [[9,2], [9,3]]);
-
-  gbPC.placeShip(__2cShip1, [[0,0], [1,0]]);
-  gbPC.placeShip(__2cShip2, [[9,2], [9,3]]);
-  gbPC.placeShip(__2cShip3, [[5,5], [5,6]]);
-  gbPC.placeShip(__2cShip4, [[0,7], [1,7]]);
+  __2cShip4.findNonPlaceableCells();
 
   //render boards - TODO
   //console.log(boardsWrapper)
   makeGrid();
-  //display ships on board - Done
+  //display human ships on board - Done
   displayShips(playerHumanPrefix, gbHuman);
-
-  //call hitACell when onlick for a cell
-  const cells = document.getElementsByClassName('cell');
-  for (let i = 0; i < cells.length; i++) {
-    cells[i].addEventListener("click", () => {
-      hitACell(cells[i]);
-    })
-  }
-
-  //loop turn by turn for each player
-  /* do {
-    if (gbHuman.areAllShipsSunk()) {
-      //announce human won
-      console.log("human won");
-      return;
-    } else if (gbPC.areAllShipsSunk()) {
-      //announce PC won
-      console.log("PC won");
-    }
-  } while (true) */
 }
 
-gameLoop();
+function startGame() {
+  //call hitACell when onlick for a cell
+  const humanCells = document.getElementsByClassName('humanCell');
+  const pcCells = document.getElementsByClassName('pcCell');
+  
+  let turn = playerHumanPrefix;
+  let continueGame = checkForWinner();
+
+  // !!!below is infinity loop - HOW TO ELIMINATE THIS
+  while (continueGame == false) {
+    if (turn == playerHumanPrefix) {
+      // disable click for humanBoard
+      humanBoard.style.pointerEvents = 'none';
+      // enable click for pcBoard
+      pcBoard.style.pointerEvents = 'auto';
+
+      for (let i = 0; i < humanCells.length; i++) {
+        humanCells[i].addEventListener("click", () => {
+          hitACell(humanCells[i]);
+          continueGame = checkForWinner();
+          turn = turn == playerHumanPrefix ? playerPCPrefix : playerHumanPrefix;
+        })
+      }
+    } 
+    else {
+      // disable click for pcBoard
+      pcBoard.style.pointerEvents = 'none';
+      // enable click for humanBoard
+      humanBoard.style.pointerEvents = 'auto';
+
+      for (let i = 0; i < pcCells.length; i++) {
+        pcCells[i].addEventListener("click", () => {
+          hitACell(pcCells[i]);
+          continueGame = checkForWinner();
+          turn = turn == playerHumanPrefix ? playerPCPrefix : playerHumanPrefix;
+        })
+      }
+    }
+  }
+}
+
+setup();
+console.log(checkForWinner());
+startGame();
+//gameLoop();
