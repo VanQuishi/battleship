@@ -198,50 +198,46 @@ function setup() {
   makeGrid();
   //display human ships on board - Done
   displayShips(playerHumanPrefix, gbHuman);
-}
 
-function startGame() {
   //call hitACell when onlick for a cell
   const humanCells = document.getElementsByClassName('humanCell');
   const pcCells = document.getElementsByClassName('pcCell');
-  
-  let turn = playerHumanPrefix;
-  let continueGame = checkForWinner();
 
-  // !!!below is infinity loop - HOW TO ELIMINATE THIS
-  while (continueGame == false) {
-    if (turn == playerHumanPrefix) {
-      // disable click for humanBoard
-      humanBoard.style.pointerEvents = 'none';
-      // enable click for pcBoard
-      pcBoard.style.pointerEvents = 'auto';
+  //let human play first
+  // disable click for humanBoard
+  humanBoard.style.pointerEvents = 'none';
+  // enable click for pcBoard
+  pcBoard.style.pointerEvents = 'auto';
 
-      for (let i = 0; i < humanCells.length; i++) {
-        humanCells[i].addEventListener("click", () => {
-          hitACell(humanCells[i]);
-          continueGame = checkForWinner();
-          turn = turn == playerHumanPrefix ? playerPCPrefix : playerHumanPrefix;
-        })
-      }
-    } 
-    else {
-      // disable click for pcBoard
-      pcBoard.style.pointerEvents = 'none';
-      // enable click for humanBoard
-      humanBoard.style.pointerEvents = 'auto';
-
-      for (let i = 0; i < pcCells.length; i++) {
-        pcCells[i].addEventListener("click", () => {
-          hitACell(pcCells[i]);
-          continueGame = checkForWinner();
-          turn = turn == playerHumanPrefix ? playerPCPrefix : playerHumanPrefix;
-        })
-      }
-    }
+  for (let i = 0; i < humanCells.length; i++) {
+    humanCells[i].addEventListener("click", () => {
+      console.log("hit human cell");
+      hitACell(humanCells[i]);
+      console.log('gbPC sunk', gbPC.areAllShipsSunk())
+      if (checkForWinner() == false) {
+        // disable click for humanBoard
+        humanBoard.style.pointerEvents = 'none';
+        // enable click for pcBoard
+        pcBoard.style.pointerEvents = 'auto';
+      }  
+    })
   }
+
+  for (let i = 0; i < pcCells.length; i++) {
+    pcCells[i].addEventListener("click", () => {
+      console.log("hit pc cell");
+      hitACell(pcCells[i]);
+      if (checkForWinner() == false) {
+        // enable click for humanBoard
+        humanBoard.style.pointerEvents = 'auto';
+        // disable click for pcBoard
+        pcBoard.style.pointerEvents = 'none';
+      }  
+    })
+  }
+
+  //TODO: Decrease opacity of board that's not in use
+  //TODO: when there's a winner, stop both board and announce winner
 }
 
 setup();
-console.log(checkForWinner());
-startGame();
-//gameLoop();
