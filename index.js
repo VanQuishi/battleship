@@ -14,6 +14,10 @@ const playerPC = new Player('Bot');
 const playerHumanPrefix = '0';
 const playerPCPrefix = '1';
 
+const hitEmptyCell = '0';
+const hitShipCell = '1';
+const hitUnavailableCell = '2';
+
 const gbHuman = new Gameboard();
 const gbPC = new Gameboard();
 
@@ -100,7 +104,7 @@ function displayNonPlaceableCells(user, ship) {
 
 function hitACell(cell) {
   if (cell.classList.contains('hitCell') || cell.classList.contains('missedCell')) {
-    return false;
+    return hitUnavailableCell;
   }
 
   let idArr = cell.id.split('');
@@ -113,18 +117,16 @@ function hitACell(cell) {
 
   if (gb.board[x][y].ship != null) {
     cell.classList.add('hitCell');
+    //if the ship is sunk then display the gray area around it
     if (gb.board[x][y].ship.isSunk()) {
       console.log('sunk');
       displayNonPlaceableCells(idArr[0], gb.board[x][y].ship);
     }
-    
-    //if the ship is sunk then display the gray area around it
-    console.log(gb.board[x][y].ship.isSunk());
+    return hitShipCell;
   } else {
     cell.classList.add('missedCell');
+    return hitEmptyCell;
   } 
-
-  return true;
 }
 
 function checkForWinner() {
@@ -206,37 +208,60 @@ function setup() {
   //let human play first
   // disable click for humanBoard
   humanBoard.style.pointerEvents = 'none';
+  humanBoard.classList.add('dimmed');
   // enable click for pcBoard
   pcBoard.style.pointerEvents = 'auto';
 
   for (let i = 0; i < humanCells.length; i++) {
     humanCells[i].addEventListener("click", () => {
       console.log("hit human cell");
-      hitACell(humanCells[i]);
-      console.log('gbPC sunk', gbPC.areAllShipsSunk())
-      if (checkForWinner() == false) {
-        // disable click for humanBoard
-        humanBoard.style.pointerEvents = 'none';
-        // enable click for pcBoard
-        pcBoard.style.pointerEvents = 'auto';
-      }  
+      let hitCellResult = hitACell(humanCells[i]);
+      if (hitCellResult == hitUnavailableCell) {
+        console.log("hit unavail cell");
+      }
+      else if (hitCellResult == hitShipCell) {
+        if (checkForWinner() == true) {
+          console.log('announce winner');
+        } 
+      }
+      else {
+        if (checkForWinner() == false) {
+          // disable click for humanBoard
+          humanBoard.style.pointerEvents = 'none';
+          humanBoard.classList.add('dimmed');
+          // enable click for pcBoard
+          pcBoard.style.pointerEvents = 'auto';
+          pcBoard.classList.remove('dimmed');
+        }  
+      }
     })
   }
 
   for (let i = 0; i < pcCells.length; i++) {
     pcCells[i].addEventListener("click", () => {
       console.log("hit pc cell");
-      hitACell(pcCells[i]);
-      if (checkForWinner() == false) {
-        // enable click for humanBoard
-        humanBoard.style.pointerEvents = 'auto';
-        // disable click for pcBoard
-        pcBoard.style.pointerEvents = 'none';
-      }  
+      let hitCellResult = hitACell(pcCells[i]);
+      if (hitCellResult == hitUnavailableCell) {
+        console.log("hit unavail cell");
+      }
+      else if (hitCellResult == hitShipCell) {
+        if (checkForWinner() == true) {
+          console.log('announce winner');
+        }
+      }
+      else {
+        if (checkForWinner() == false) {
+          // enable click for humanBoard
+          humanBoard.style.pointerEvents = 'auto';
+          humanBoard.classList.remove('dimmed');
+          // disable click for pcBoard
+          pcBoard.style.pointerEvents = 'none';
+          pcBoard.classList.add('dimmed');
+        }  
+      }
     })
   }
 
-  //TODO: Decrease opacity of board that's not in use
   //TODO: when there's a winner, stop both board and announce winner
 }
 
