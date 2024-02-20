@@ -6,6 +6,7 @@ const boardsWrapper = document.getElementById('boardsWrapper');
 const boards = document.getElementsByClassName('board');
 const humanBoard = document.getElementById('humanBoard');
 const pcBoard = document.getElementById('pcBoard');
+const msgBox = document.getElementById('msg');
 
 const boardWidth = 10;
 
@@ -17,6 +18,10 @@ const playerPCPrefix = '1';
 const hitEmptyCell = '0';
 const hitShipCell = '1';
 const hitUnavailableCell = '2';
+
+var botMoves = [];
+var prevMoveLocation = [];
+const botPrevTurn = 'rand';
 
 const gbHuman = new Gameboard();
 const gbPC = new Gameboard();
@@ -144,6 +149,75 @@ function checkForWinner() {
   return false;
 }
 
+function displayMsg(msg) {
+  msgBox.innerHTML = msg;
+}
+
+function isLegitLocation(location) {
+  if (0 <= location[0] && location[0] <= 9) {
+    if (0 <= location[1] && location[1] <= 9) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+//TODO: when there's a winner, stop both board and announce winner
+//TODO: allows user to rotate ship's axis
+
+function botNextMove() {
+  let x = 0;
+  let y = 0;
+
+  if (botMoves.length == 0) {
+    //if no ship is hit and botMoves array is empty, then return new random location
+    if (botPrevTurn == 'rand') {
+      console.log({x}, {y})
+      do {
+        x = Math.floor(Math.random() * boardWidth);
+        y = Math.floor(Math.random() * boardWidth);
+        console.log({x}, {y})
+      } while(gbHuman.board[x][y].isHit == true);
+      
+      return [x, y];
+    }
+    //if part of ship is hit and botMoves array is empty, fill botMoves array with legal locations in 4 directions
+    else if (botPrevTurn == 'hit') {
+      //top
+      x = prevMoveLocation[0];
+      y = prevMoveLocation[1] - 1;
+      if (isLegitLocation([x,y]) && gbHuman.board[x][y].isHit == false) {
+        botMoves.push([x,y]);
+      }
+
+      //bottom
+      x = prevMoveLocation[0];
+      y = prevMoveLocation[1] + 1;
+      if (isLegitLocation([x,y]) && gbHuman.board[x][y].isHit == false) {
+        botMoves.push([x,y]);
+      }
+
+      //left
+      x = prevMoveLocation[0] - 1;
+      y = prevMoveLocation[1];
+      if (isLegitLocation([x,y]) && gbHuman.board[x][y].isHit == false) {
+        botMoves.push([x,y]);
+      }
+
+      //right
+      x = prevMoveLocation[0] + 1;
+      y = prevMoveLocation[1];
+      if (isLegitLocation([x,y]) && gbHuman.board[x][y].isHit == false) {
+        botMoves.push([x,y]);
+      }
+    }
+  }
+
+  // Either ways, return one move from the array
+  return (botMoves.pop());
+}
+
 function setup() {
   //preset gameboardHuman
   gbHuman.placeShip(_5cShip, [[4,9], [5,9], [6,9], [7,9], [8,9]]);
@@ -221,7 +295,7 @@ function setup() {
       }
       else if (hitCellResult == hitShipCell) {
         if (checkForWinner() == true) {
-          console.log('announce winner');
+          displayMsg("Bot won! Better luck next time!");
         } 
       }
       else {
@@ -246,7 +320,7 @@ function setup() {
       }
       else if (hitCellResult == hitShipCell) {
         if (checkForWinner() == true) {
-          console.log('announce winner');
+          displayMsg("You won!");
         }
       }
       else {
@@ -257,12 +331,93 @@ function setup() {
           // disable click for pcBoard
           pcBoard.style.pointerEvents = 'none';
           pcBoard.classList.add('dimmed');
+          console.log('bot next move', botNextMove())
         }  
       }
     })
   }
-
-  //TODO: when there's a winner, stop both board and announce winner
 }
 
-setup();
+function drawShip(axis, cellID, length) {
+  console.log('hit drawShip')
+  let idArr = cellID.split('');
+  let x = parseInt(idArr[2]);
+  let y = idArr[3];
+
+  if (axis == 'hori') {
+    console.log('reached if in drawship')
+    let lastX = x + length - 1;
+    console.log({lastX})
+    if (isLegitLocation([lastX, y])) {
+      console.log('hit 2nd if')
+      for (let i = x; i <= lastX; i++) {
+        console.log('inside loop')
+        let id = `${playerHumanPrefix}-${i}${y}`;
+        let cell = document.getElementById(id);
+        //cell.style.border = '2px solid #88AB8E';
+        //cell.style.backgroundColor = '#C3E2C2';
+        cell.classList.add('chosenCell');
+      }
+    } else {
+      //TODO: Print to screen "Ship is out of bound, can't be placed"
+      displayMsg("Ship is out of bound. Can't be placed");
+      //Prevent user to clicked
+    }
+  }
+}
+
+function undrawShip(axis, cellID, length) {
+  console.log('hit drawShip')
+  let idArr = cellID.split('');
+  let x = parseInt(idArr[2]);
+  let y = idArr[3];
+
+  if (axis == 'hori') {
+    let lastX = x + length - 1;
+    console.log({lastX})
+    if (isLegitLocation([lastX, y])) {
+      for (let i = x; i <= lastX; i++) {
+        let id = `${playerHumanPrefix}-${i}${y}`;
+        let cell = document.getElementById(id);
+        //cell.style.border = '1px solid black';
+        //cell.style.backgroundColor = 'inherit';
+        cell.classList.remove('chosenCell');
+      }
+    }
+  }
+}
+
+function userPlaceShip() {
+  let shipSizes = [4,3,3,2,2,2,1,1,1,1];
+  let currentShipSize = shipSizes.shift();
+  let axis = 'hori';
+
+  window.addEventListener("keydown", (event) => {
+    if (event.code === "KeyR") {
+      axis = axis == 'hori' ? 'verti' : 'hori';
+      console.log({axis});
+    }
+  });
+
+  const humanCells = document.querySelectorAll('.humanCell');
+
+  humanCells.forEach((cell) => {
+    cell.addEventListener('mouseenter', (e) => {
+      console.log("mouse enterred humancell", cell.id);  
+      drawShip(axis, cell.id, currentShipSize);
+    });
+
+    cell.addEventListener('mouseleave', (e) => {
+      undrawShip(axis, cell.id, currentShipSize);
+    });
+
+    cell.addEventListener('click', (e) => {
+      //TODO: only allow ship to be placed if it's not out of bound
+      //TODO: create ship, add to board, display it
+    })
+  });
+}
+
+makeGrid();
+userPlaceShip();
+//setup();
