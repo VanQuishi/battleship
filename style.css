@@ -51,7 +51,7 @@ h1, h2, h3, h4, h5, h6{
   border: 1px solid black;
 }
 
-.chosenCell, .cell:hover {
+.drawnCell, .chosenCell, .cell:hover {
   border: 2px solid #88AB8E;
   background-color: #C3E2C2;
   cursor: pointer;

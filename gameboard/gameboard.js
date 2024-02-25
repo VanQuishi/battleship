@@ -1,9 +1,9 @@
 class Gameboard {
   constructor() {
     this.board = [];
-    for (let x = 0; x < 100; x++) {
+    for (let x = 0; x < 10; x++) {
       this.board[x] = [];
-      for (let y = 0; y < 100; y++) {
+      for (let y = 0; y < 10; y++) {
         this.board[x][y] = {ship: null, isHit: false};
       }
     }

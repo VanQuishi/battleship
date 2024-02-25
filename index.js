@@ -40,6 +40,11 @@ var _2cShip2 = new Ship(2, hori);
 var _2cShip3 = new Ship(2, verti);
 var _2cShip4 = new Ship(2, verti);
 
+var _1cShip1 = new Ship(1, hori);
+var _1cShip2 = new Ship(1, hori);
+var _1cShip3 = new Ship(1, verti);
+var _1cShip4 = new Ship(1, verti);
+
 var __5cShip = new Ship(5, hori);
 
 var __4cShip1 = new Ship(4, hori);
@@ -79,12 +84,10 @@ function makeGrid() {
 }
 
 function displayShips(user, gameboard) {
-  //console.log(gameboard.board);
-
   for (let y = 0; y < boardWidth; y++) {
     for (let x = 0; x < boardWidth; x++) {
-      console.log(gameboard.board[x][y].ship)
       if (gameboard.board[x][y].ship != null) {
+        console.log(gameboard.board[x][y].ship);
         let cellID = `${user}-${x}${y}`;
         console.log({cellID});
         let cell = document.getElementById(cellID);
@@ -339,31 +342,31 @@ function setup() {
 }
 
 function drawShip(axis, cellID, length) {
-  console.log('hit drawShip')
   let idArr = cellID.split('');
   let x = parseInt(idArr[2]);
   let y = idArr[3];
+  let shipLocationArr = [];
 
-  if (axis == 'hori') {
-    console.log('reached if in drawship')
+  if (axis == hori) {
     let lastX = x + length - 1;
-    console.log({lastX})
     if (isLegitLocation([lastX, y])) {
       console.log('hit 2nd if')
       for (let i = x; i <= lastX; i++) {
         console.log('inside loop')
         let id = `${playerHumanPrefix}-${i}${y}`;
         let cell = document.getElementById(id);
-        //cell.style.border = '2px solid #88AB8E';
-        //cell.style.backgroundColor = '#C3E2C2';
-        cell.classList.add('chosenCell');
+        cell.classList.add('drawnCell');
+        shipLocationArr.push([i, parseInt(y)]);
       }
+      displayMsg("Place your ship.");
     } else {
       //TODO: Print to screen "Ship is out of bound, can't be placed"
-      displayMsg("Ship is out of bound. Can't be placed");
+      displayMsg("Ship is out of bound. Can't be placed.");
       //Prevent user to clicked
     }
   }
+
+  return shipLocationArr;
 }
 
 function undrawShip(axis, cellID, length) {
@@ -372,7 +375,7 @@ function undrawShip(axis, cellID, length) {
   let x = parseInt(idArr[2]);
   let y = idArr[3];
 
-  if (axis == 'hori') {
+  if (axis == hori) {
     let lastX = x + length - 1;
     console.log({lastX})
     if (isLegitLocation([lastX, y])) {
@@ -381,20 +384,21 @@ function undrawShip(axis, cellID, length) {
         let cell = document.getElementById(id);
         //cell.style.border = '1px solid black';
         //cell.style.backgroundColor = 'inherit';
-        cell.classList.remove('chosenCell');
+        cell.classList.remove('drawnCell');
       }
     }
   }
 }
 
 function userPlaceShip() {
-  let shipSizes = [4,3,3,2,2,2,1,1,1,1];
-  let currentShipSize = shipSizes.shift();
-  let axis = 'hori';
+  let ships = [_4cShip1, _3cShip1, _3cShip2, _2cShip1, _2cShip2, _2cShip3, _1cShip1, _1cShip2, _1cShip3, _1cShip4];
+  let currentShip = ships.shift();
+  let axis = hori;
+  let shipLocationArr = [];
 
   window.addEventListener("keydown", (event) => {
     if (event.code === "KeyR") {
-      axis = axis == 'hori' ? 'verti' : 'hori';
+      axis = axis == hori ? verti : hori;
       console.log({axis});
     }
   });
@@ -404,16 +408,32 @@ function userPlaceShip() {
   humanCells.forEach((cell) => {
     cell.addEventListener('mouseenter', (e) => {
       console.log("mouse enterred humancell", cell.id);  
-      drawShip(axis, cell.id, currentShipSize);
+      shipLocationArr = drawShip(axis, cell.id, currentShip.length);
+      currentShip.axial = axis;
+      console.log({shipLocationArr});
     });
 
     cell.addEventListener('mouseleave', (e) => {
-      undrawShip(axis, cell.id, currentShipSize);
+      undrawShip(axis, cell.id, currentShip.length);
     });
 
     cell.addEventListener('click', (e) => {
-      //TODO: only allow ship to be placed if it's not out of bound
-      //TODO: create ship, add to board, display it
+      console.log('clicked cell', {shipLocationArr});
+      gbHuman.placeShip(currentShip, shipLocationArr);
+      console.log('board', gbHuman.board);
+      displayShips(playerHumanPrefix, gbHuman);
+
+      //move on to next ship
+      if (ships.length > 0) {
+        currentShip = ships.shift();
+      }   
+
+      // TODO: how to know when all ships are placed?
+      else if (ships.length == 0) {
+        /* return new Promise(function(resolve, reject) {
+          resolve('done placing ship');
+        }); */
+      }
     })
   });
 }
