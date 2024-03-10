@@ -29,19 +29,20 @@ class Ship {
   }
 
   findNonPlaceableCells() {
+    this.nonPlaceableCells = [];
     let x = 0;
     let y = 0;
     for (let i = 0; i < this.locations.length; i++) {
       // first cell
       if (i == 0) {
-        if (this.axial == verti) {
+        if (this.axial == verti || this.locations.length == 1) {
           x = this.locations[i][0];
           y = this.locations[i][1] - 1;
           if (this.checkValidLocation(x,y)) {
             this.nonPlaceableCells.push([x,y]);
           }      
         }
-        else {
+        if (this.axial == hori || this.locations.length == 1) {
           x = this.locations[i][0] - 1;
           y = this.locations[i][1];
           if (this.checkValidLocation(x,y)) {
@@ -52,14 +53,14 @@ class Ship {
 
       // last cell
       if (i == (this.locations.length - 1)) {
-        if (this.axial == verti) {
+        if (this.axial == verti || this.locations.length == 1) {
           x = this.locations[i][0];
           y = this.locations[i][1] + 1;
           if (this.checkValidLocation(x,y)) {
             this.nonPlaceableCells.push([x,y]);
           }     
         }
-        else {
+        if (this.axial == hori || this.locations.length == 1) {
           x = this.locations[i][0] + 1;
           y = this.locations[i][1];
           if (this.checkValidLocation(x,y)) {

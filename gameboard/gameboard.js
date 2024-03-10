@@ -1,11 +1,13 @@
+const boardLength = 10;
+
 class Gameboard {
   constructor() {
     this.board = [];
-    for (let x = 0; x < 10; x++) {
+    for (let x = 0; x < boardLength; x++) {
       this.board[x] = [];
-      for (let y = 0; y < 10; y++) {
+      for (let y = 0; y < boardLength; y++) {
         this.board[x][y] = {ship: null, isHit: false};
-      }
+      } 
     }
 
     this.aliveShips = 0;

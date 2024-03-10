@@ -57,10 +57,10 @@ h1, h2, h3, h4, h5, h6{
   cursor: pointer;
 }
 
-.missedCell {
+.missedCell, .permanentMissedCell {
   background-color: #c3c4c5;
 }
-.missedCell:hover{
+.missedCell:hover, .permanentMissedCell:hover{
   border: 1px solid black;
   background-color: #c3c4c5;
   cursor:not-allowed;

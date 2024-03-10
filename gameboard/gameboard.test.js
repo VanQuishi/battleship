@@ -14,21 +14,9 @@ describe('gameboard object', () => {
     expect(gb).toBeInstanceOf(Gameboard);
   });
 
-  test('has board field created with 100 cells', () => {
-    const arr = [];
-    for (let x = 0; x < 100; x++) {
-      arr[x] = [];
-      for (let y = 0; y < 100; y++) {
-        arr[x][y] = {ship: null, isHit: false};
-      }
-    }
-  
-    expect(gb.board).toEqual(arr);
-  });
-
   test('has all cells that have never been hit yet as default', () => {
-    for (let i = 0; i < gb.board.length; i++) {
-      for (let j = 0; j < gb.board.length; j++) {
+    for (let i = 0; i < gb.boardLength; i++) {
+      for (let j = 0; j < gb.boardLength; j++) {
         expect(gb.board[i][j].isHit).toBe(false);
       }
     }

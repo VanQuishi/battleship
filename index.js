@@ -4,6 +4,7 @@ import {Ship, hori, verti} from './ship/ship.js';
 
 const boardsWrapper = document.getElementById('boardsWrapper');
 const boards = document.getElementsByClassName('board');
+const placementBoard = document.getElementById('placementBoard');
 const humanBoard = document.getElementById('humanBoard');
 const pcBoard = document.getElementById('pcBoard');
 const msgBox = document.getElementById('msg');
@@ -14,6 +15,7 @@ const playerHuman = new Player('Nin');
 const playerPC = new Player('Bot');
 const playerHumanPrefix = '0';
 const playerPCPrefix = '1';
+const placementPrefix = '2';
 
 const hitEmptyCell = '0';
 const hitShipCell = '1';
@@ -26,19 +28,15 @@ const botPrevTurn = 'rand';
 const gbHuman = new Gameboard();
 const gbPC = new Gameboard();
 
-var _5cShip = new Ship(5, hori);
 
 var _4cShip1 = new Ship(4, hori);
-var _4cShip2 = new Ship(4, verti);
 
 var _3cShip1 = new Ship(3, verti);
 var _3cShip2 = new Ship(3, hori);
-var _3cShip3 = new Ship(3, verti);
 
 var _2cShip1 = new Ship(2, hori);
 var _2cShip2 = new Ship(2, hori);
 var _2cShip3 = new Ship(2, verti);
-var _2cShip4 = new Ship(2, verti);
 
 var _1cShip1 = new Ship(1, hori);
 var _1cShip2 = new Ship(1, hori);
@@ -59,39 +57,51 @@ var __2cShip2 = new Ship(2, hori);
 var __2cShip3 = new Ship(2, verti);
 var __2cShip4 = new Ship(2, verti);
 
-function makeGrid() {
-  for (let j = 0; j < boards.length; j++) {
-    boards[j].style.setProperty('--grid-rows', boardWidth);
-    boards[j].style.setProperty('--grid-cols', boardWidth);
-  }
+const outOfBoundErrMsg = "Ship is out of bound. Can't be placed.";
+const overlappedErrMsg = "Cannot overlap your ship";
 
-  // Create 2 boards. Assign xy coordinate to the cells' ids
-  for (let j = 0; j < boards.length; j++) {
-    for (let i = 0; i < boardWidth; i++) {
-      for (let k = 0; k < boardWidth; k++) {
-        let gridItem = document.createElement('div');
-        gridItem.id = `${j}-${k}${i}`;
-        gridItem.classList.add('cell');
-        if (j == playerHumanPrefix) {
+function makeGrid(board) {
+
+  //set property should be the same for all boards
+  board.style.setProperty('--grid-rows', boardWidth);
+  board.style.setProperty('--grid-cols', boardWidth);
+
+  //assign cells id for different board's id
+  for (let i = 0; i < boardWidth; i++) {
+    for (let k = 0; k < boardWidth; k++) {
+      let gridItem = document.createElement('div');
+      switch (board.id) {
+        case "humanBoard":
+          console.log("reached makeGrad human")
+          gridItem.id = `${playerHumanPrefix}-${k}${i}`;
           gridItem.classList.add('humanCell');
-        } else {
+          break;
+        case "pcBoard":
+          gridItem.id = `${playerPCPrefix}-${k}${i}`;
           gridItem.classList.add('pcCell');
-        }
-        boards[j].appendChild(gridItem);
+          break;
+        case "placementBoard":
+          console.log("reached makeGrad placement")
+          gridItem.id = `${placementPrefix}-${k}${i}`;
+          gridItem.classList.add('placementCell');
+          break;
       }
+      
+      gridItem.classList.add('cell');
+      board.appendChild(gridItem);
     }
   }
+  
 }
 
 function displayShips(user, gameboard) {
   for (let y = 0; y < boardWidth; y++) {
     for (let x = 0; x < boardWidth; x++) {
       if (gameboard.board[x][y].ship != null) {
-        console.log(gameboard.board[x][y].ship);
         let cellID = `${user}-${x}${y}`;
         console.log({cellID});
         let cell = document.getElementById(cellID);
-
+        console.log({cell})
         // only display the user's ships. hide the bot's
         if (user == playerHumanPrefix) {
           cell.classList.add('chosenCell');
@@ -101,12 +111,25 @@ function displayShips(user, gameboard) {
   }
 }
 
-function displayNonPlaceableCells(user, ship) {
-  console.log('gray cells', ship.nonPlaceableCells)
+function drawNonPlaceableCells(user, ship, isPermanent) {
+  console.log("hit display gray cells")
   for (let i = 0; i < ship.nonPlaceableCells.length; i++) {
     let cellID = `${user}-${ship.nonPlaceableCells[i][0]}${ship.nonPlaceableCells[i][1]}`;
     let cell = document.getElementById(cellID);
-    cell.classList.add('missedCell');
+    if (isPermanent) {
+      cell.classList.add('permanentMissedCell');
+    } else {
+      cell.classList.add('missedCell');
+    }  
+  }
+}
+
+function undrawNonPlaceableCells(user, ship) {
+  //console.log('gray cells', ship.nonPlaceableCells)
+  for (let i = 0; i < ship.nonPlaceableCells.length; i++) {
+    let cellID = `${user}-${ship.nonPlaceableCells[i][0]}${ship.nonPlaceableCells[i][1]}`;
+    let cell = document.getElementById(cellID);
+    cell.classList.remove('missedCell');
   }
 }
 
@@ -128,7 +151,7 @@ function hitACell(cell) {
     //if the ship is sunk then display the gray area around it
     if (gb.board[x][y].ship.isSunk()) {
       console.log('sunk');
-      displayNonPlaceableCells(idArr[0], gb.board[x][y].ship);
+      drawNonPlaceableCells(idArr[0], gb.board[x][y].ship, true);
     }
     return hitShipCell;
   } else {
@@ -221,9 +244,181 @@ function botNextMove() {
   return (botMoves.pop());
 }
 
+function drawShip(axis, cellID, length) {
+  //console.log("hit drawShip", cellID);
+  let idArr = cellID.split('');
+  let prefix = idArr[0];
+  let x = parseInt(idArr[2]);
+  let y = parseInt(idArr[3]);
+  let shipLocationArr = [];
+
+  if (axis == hori) {
+    let lastX = x + length - 1;
+    if (isLegitLocation([lastX, y])) {
+      for (let i = x; i <= lastX; i++) {
+        let id = `${prefix}-${i}${y}`;
+        let cell = document.getElementById(id);
+        if (cell.classList.contains('chosenCell') || cell.classList.contains('permanentMissedCell')) {
+          console.log('reached overlapped')
+          displayMsg(overlappedErrMsg);
+          return [];
+        }
+        cell.classList.add('drawnCell');
+        shipLocationArr.push([i, y]);
+      }
+      displayMsg("Place your ship.");
+    } else {
+      displayMsg(outOfBoundErrMsg);
+      return [];
+    }
+  }
+  else {
+    let lastY = y + length - 1;
+    if (isLegitLocation([x, lastY])) {
+      for (let i = y; i <= lastY; i++) {
+        let id = `${prefix}-${x}${i}`;
+        let cell = document.getElementById(id);
+        if (cell.classList.contains('chosenCell') || cell.classList.contains('permanentMissedCell')) {
+          console.log('reached overlapped');
+          displayMsg(overlappedErrMsg);
+          return [];
+        }
+        cell.classList.add('drawnCell');
+        shipLocationArr.push([x, i]);
+      }
+      displayMsg("Place your ship.");
+    } else {
+      displayMsg(outOfBoundErrMsg);
+      return [];
+    }
+  }
+
+  return shipLocationArr;
+}
+
+function undrawShip(axis, cellID, length) {
+  //console.log('hit undrawShip', cellID)
+  let idArr = cellID.split('');
+  let prefix = idArr[0];
+  let x = parseInt(idArr[2]);
+  let y = parseInt(idArr[3]);
+
+  if (axis == hori) {
+    let lastX = x + length - 1;
+    if (isLegitLocation([lastX, y])) {
+      for (let i = x; i <= lastX; i++) {
+        let id = `${prefix}-${i}${y}`;
+        let cell = document.getElementById(id);
+        cell.classList.remove('drawnCell');
+      }
+    }
+  }
+  else {
+    let lastY = y + length - 1;
+    if (isLegitLocation([x, lastY])) {
+      for (let i = y; i <= lastY; i++) {
+        let id = `${prefix}-${x}${i}`;
+        let cell = document.getElementById(id);
+        cell.classList.remove('drawnCell');
+      }
+    }
+  }
+}
+
+function userPlaceShip() {
+  let ships = [_4cShip1, _3cShip1, _3cShip2, _2cShip1, _2cShip2, _2cShip3, _1cShip1, _1cShip2, _1cShip3, _1cShip4];
+  let currentShip = ships.shift();
+  let axis = hori;
+  let cellID = '';
+  let shipLocationArr = [];
+
+  const mouseenterAction = (axis, id, shipLength) => {
+    shipLocationArr = drawShip(axis, id, shipLength);
+    currentShip.locations = shipLocationArr;
+    currentShip.axial = axis;
+    currentShip.findNonPlaceableCells();
+    //console.log(currentShip.nonPlaceableCells)
+
+    //draw non placeable cells
+    drawNonPlaceableCells(placementPrefix, currentShip, false);
+  }
+  const mouseleaveAction = (axis, id, shipLength) => {
+    undrawShip(axis, id, shipLength);
+
+    //undrawNonPlaceable cells
+    undrawNonPlaceableCells(placementPrefix, currentShip);
+  }
+
+   //if axis is changed, draw again
+   window.addEventListener("keydown", (event) => {
+    if (event.code === "KeyR") {
+      axis = axis == hori ? verti : hori;
+      console.log('hit R', axis, cellID, currentShip.length)
+      //check if cellID is populated (meaning mouse pointer has entered a cell)
+      if (cellID !== '') {
+        //remove any display from the old axis
+        let oldaxis = axis == hori ? verti : hori;
+        mouseleaveAction(oldaxis, cellID, currentShip.length);
+
+        //display ship with current axis
+        mouseenterAction(axis, cellID, currentShip.length);
+      } 
+    }
+  });
+
+  var placementCells = document.querySelectorAll('.placementCell');
+
+  placementCells.forEach((cell) => {
+      cell.addEventListener('mouseenter', function eventHandler() {
+        if (!cell.classList.contains('chosenCell') && !cell.classList.contains('permanentMissedCell')) {
+          cellID = cell.id;
+          mouseenterAction(axis, cellID, currentShip.length);
+        }
+        else {
+          displayMsg('Cannot place your ship here');
+        }
+      });
+
+      cell.addEventListener('mouseleave', (e) => {
+        if (!cell.classList.contains('chosenCell') && !cell.classList.contains('permanentMissedCell')) {
+          mouseleaveAction(axis, cellID, currentShip.length);
+          cellID = '';
+        }
+      });
+
+      cell.addEventListener('click', (e) => {
+        if (!cell.classList.contains('chosenCell') && !cell.classList.contains('permanentMissedCell')) {
+          if (msgBox.innerHTML != outOfBoundErrMsg || msgBox.innerHTML != overlappedErrMsg) {
+            gbHuman.placeShip(currentShip, shipLocationArr);
+
+            for (let i = 0; i < shipLocationArr.length; i++) {
+              let cellID = `${placementPrefix}-${[shipLocationArr[i][0]]}${[shipLocationArr[i][1]]}`;
+              let c = document.getElementById(cellID);
+              c.classList.add('chosenCell');
+            }
+
+            //make non placeable cells stayed
+            drawNonPlaceableCells(placementPrefix, currentShip, true);
+
+            if (ships.length > 0) {
+              currentShip = ships.shift();
+            }
+            else {
+              placementBoard.style.display = 'none';
+
+              humanBoard.style.display = 'grid';
+              pcBoard.style.display = 'grid';
+              displayShips(playerHumanPrefix, gbHuman);
+            }
+          }  
+        }
+      });
+  });
+}
+
 function setup() {
   //preset gameboardHuman
-  gbHuman.placeShip(_5cShip, [[4,9], [5,9], [6,9], [7,9], [8,9]]);
+  /* gbHuman.placeShip(_5cShip, [[4,9], [5,9], [6,9], [7,9], [8,9]]);
   _5cShip.findNonPlaceableCells();
 
   gbHuman.placeShip(_4cShip1, [[6,0], [7,0], [8,0], [9,0]]);
@@ -245,7 +440,9 @@ function setup() {
   gbHuman.placeShip(_2cShip3, [[5,5], [5,6]]);
   _2cShip3.findNonPlaceableCells();
   gbHuman.placeShip(_2cShip4, [[9,2], [9,3]]);
-  _2cShip4.findNonPlaceableCells();
+  _2cShip4.findNonPlaceableCells(); */
+
+  userPlaceShip();
 
   //preset gameboardPC
   gbPC.placeShip(__5cShip, [[4,9], [5,9], [6,9], [7,9], [8,9]]);
@@ -272,7 +469,6 @@ function setup() {
   gbPC.placeShip(__2cShip4, [[9,2], [9,3]]);
   __2cShip4.findNonPlaceableCells();
 
-  //render boards - TODO
   //console.log(boardsWrapper)
   makeGrid();
   //display human ships on board - Done
@@ -341,103 +537,15 @@ function setup() {
   }
 }
 
-function drawShip(axis, cellID, length) {
-  let idArr = cellID.split('');
-  let x = parseInt(idArr[2]);
-  let y = idArr[3];
-  let shipLocationArr = [];
+makeGrid(placementBoard);
+makeGrid(humanBoard);
+makeGrid(pcBoard);
 
-  if (axis == hori) {
-    let lastX = x + length - 1;
-    if (isLegitLocation([lastX, y])) {
-      console.log('hit 2nd if')
-      for (let i = x; i <= lastX; i++) {
-        console.log('inside loop')
-        let id = `${playerHumanPrefix}-${i}${y}`;
-        let cell = document.getElementById(id);
-        cell.classList.add('drawnCell');
-        shipLocationArr.push([i, parseInt(y)]);
-      }
-      displayMsg("Place your ship.");
-    } else {
-      //TODO: Print to screen "Ship is out of bound, can't be placed"
-      displayMsg("Ship is out of bound. Can't be placed.");
-      //Prevent user to clicked
-    }
-  }
-
-  return shipLocationArr;
-}
-
-function undrawShip(axis, cellID, length) {
-  console.log('hit drawShip')
-  let idArr = cellID.split('');
-  let x = parseInt(idArr[2]);
-  let y = idArr[3];
-
-  if (axis == hori) {
-    let lastX = x + length - 1;
-    console.log({lastX})
-    if (isLegitLocation([lastX, y])) {
-      for (let i = x; i <= lastX; i++) {
-        let id = `${playerHumanPrefix}-${i}${y}`;
-        let cell = document.getElementById(id);
-        //cell.style.border = '1px solid black';
-        //cell.style.backgroundColor = 'inherit';
-        cell.classList.remove('drawnCell');
-      }
-    }
-  }
-}
-
-function userPlaceShip() {
-  let ships = [_4cShip1, _3cShip1, _3cShip2, _2cShip1, _2cShip2, _2cShip3, _1cShip1, _1cShip2, _1cShip3, _1cShip4];
-  let currentShip = ships.shift();
-  let axis = hori;
-  let shipLocationArr = [];
-
-  window.addEventListener("keydown", (event) => {
-    if (event.code === "KeyR") {
-      axis = axis == hori ? verti : hori;
-      console.log({axis});
-    }
-  });
-
-  const humanCells = document.querySelectorAll('.humanCell');
-
-  humanCells.forEach((cell) => {
-    cell.addEventListener('mouseenter', (e) => {
-      console.log("mouse enterred humancell", cell.id);  
-      shipLocationArr = drawShip(axis, cell.id, currentShip.length);
-      currentShip.axial = axis;
-      console.log({shipLocationArr});
-    });
-
-    cell.addEventListener('mouseleave', (e) => {
-      undrawShip(axis, cell.id, currentShip.length);
-    });
-
-    cell.addEventListener('click', (e) => {
-      console.log('clicked cell', {shipLocationArr});
-      gbHuman.placeShip(currentShip, shipLocationArr);
-      console.log('board', gbHuman.board);
-      displayShips(playerHumanPrefix, gbHuman);
-
-      //move on to next ship
-      if (ships.length > 0) {
-        currentShip = ships.shift();
-      }   
-
-      // TODO: how to know when all ships are placed?
-      else if (ships.length == 0) {
-        /* return new Promise(function(resolve, reject) {
-          resolve('done placing ship');
-        }); */
-      }
-    })
-  });
-}
-
-makeGrid();
 userPlaceShip();
-//setup();
+
+/*TODO: make placement board to display nonplaceable cells
+        stop user from placing ship in nonplaceable cells
+
+        -> how: set location after drawship
+                
+*/       
