@@ -43,19 +43,20 @@ var _1cShip2 = new Ship(1, hori);
 var _1cShip3 = new Ship(1, verti);
 var _1cShip4 = new Ship(1, verti);
 
-var __5cShip = new Ship(5, hori);
 
 var __4cShip1 = new Ship(4, hori);
-var __4cShip2 = new Ship(4, verti);
 
 var __3cShip1 = new Ship(3, verti);
 var __3cShip2 = new Ship(3, hori);
-var __3cShip3 = new Ship(3, verti);
 
 var __2cShip1 = new Ship(2, hori);
 var __2cShip2 = new Ship(2, hori);
 var __2cShip3 = new Ship(2, verti);
-var __2cShip4 = new Ship(2, verti);
+
+var __1cShip1 = new Ship(1, hori);
+var __1cShip2 = new Ship(1, hori);
+var __1cShip3 = new Ship(1, verti);
+var __1cShip4 = new Ship(1, verti);
 
 const outOfBoundErrMsg = "Ship is out of bound. Can't be placed.";
 const overlappedErrMsg = "Cannot overlap your ship";
@@ -102,10 +103,11 @@ function displayShips(user, gameboard) {
         console.log({cellID});
         let cell = document.getElementById(cellID);
         console.log({cell})
+        cell.classList.add('chosenCell');
         // only display the user's ships. hide the bot's
-        if (user == playerHumanPrefix) {
+/*         if (user == playerHumanPrefix) {
           cell.classList.add('chosenCell');
-        }      
+        } */      
       }
     }
   }
@@ -325,6 +327,101 @@ function undrawShip(axis, cellID, length) {
   }
 }
 
+function getRandomInt(max) {
+  return Math.floor(Math.random() * max);
+}
+
+function botPlaceShip() {
+  let ships = [__4cShip1, __3cShip1, __3cShip2, __2cShip1, __2cShip2, __2cShip3, __1cShip1, __1cShip2, __1cShip3, __1cShip4];
+  let occupiedShipLocation = [];
+  let occupiedNonPlaceableLocation = [];
+  let chooseAgainFlag = false;
+  //TODO: USE 2D ARRAY TO SEARCH FOR EXISTING LOCATIONS DOES NOT WORK - FIX!!!
+  for (let k = 0; k < ships.length; k++) {
+    let currentShip = ships[k];
+    do {
+      chooseAgainFlag = false;
+      //random axis choice (0 or 1)
+      let randAxis = getRandomInt(2);
+      let axis = randAxis == 0 ? hori : verti;
+      //console.log('bot place ship', axis);
+      //random x and y value from 0 to 9 - this is first cell location
+      let x = getRandomInt(10);
+      let y = getRandomInt(10);
+      //console.log('prev location', x, y);
+      if (occupiedShipLocation.includes([x,y]) == true || occupiedNonPlaceableLocation.includes([x,y]) == true) {
+        console.log('inside first location check failed', x, y)
+        chooseAgainFlag = true;
+        continue;
+      }
+  
+      console.log("first location of ship:", x, y, axis)
+      if (axis == hori) {
+        let lastX = x + currentShip.length - 1;
+        if (isLegitLocation([lastX, y])) {
+          for (let i = x; i <= lastX; i++) {
+            if (occupiedShipLocation.includes([i, y]) || occupiedNonPlaceableLocation.includes([i, y])) {
+              chooseAgainFlag = true;
+              break;
+            }
+          }
+          console.log({chooseAgainFlag});
+          if (chooseAgainFlag == false) {
+            for (let i = x; i <= lastX; i++) {
+              occupiedShipLocation.push([i, y]);
+              currentShip.locations.push([i, y]);
+            } 
+            currentShip.findNonPlaceableCells();
+            for (let i = 0; i < currentShip.nonPlaceableCells.length; i++) {
+              occupiedNonPlaceableLocation.push(currentShip.nonPlaceableCells[i]);
+            }
+            currentShip.axial = axis;
+            gbPC.placeShip(currentShip, currentShip.locations);
+            console.log({currentShip});
+            console.log({occupiedShipLocation});
+            console.log({occupiedNonPlaceableLocation});
+          }
+        }
+        else {
+          chooseAgainFlag = true;
+          continue;
+        }
+      }
+      else {
+        let lastY = y + currentShip.length - 1;
+        if (isLegitLocation([x, lastY])) {
+          for (let i = y; i <= lastY; i++) {
+            if (occupiedShipLocation.includes([x, i]) || occupiedNonPlaceableLocation.includes([x, i])) {
+              chooseAgainFlag = true;
+              break;
+            }
+          } 
+          console.log({chooseAgainFlag});
+          if (chooseAgainFlag == false) {
+            for (let i = y; i <= lastY; i++) {
+              occupiedShipLocation.push([x, i]);
+              currentShip.locations.push([x, i]);
+            } 
+            currentShip.findNonPlaceableCells();
+            for (let i = 0; i < currentShip.nonPlaceableCells.length; i++) {
+              occupiedNonPlaceableLocation.push(currentShip.nonPlaceableCells[i]);
+            }
+            currentShip.axial = axis;
+            gbPC.placeShip(currentShip, currentShip.locations);
+            console.log({currentShip});
+            console.log({occupiedShipLocation});
+            console.log({occupiedNonPlaceableLocation});
+          }
+        }
+        else {
+          chooseAgainFlag = true;
+          continue;
+        }
+      }
+    } while (chooseAgainFlag)
+  }
+}
+
 function userPlaceShip() {
   let ships = [_4cShip1, _3cShip1, _3cShip2, _2cShip1, _2cShip2, _2cShip3, _1cShip1, _1cShip2, _1cShip3, _1cShip4];
   let currentShip = ships.shift();
@@ -409,6 +506,8 @@ function userPlaceShip() {
               humanBoard.style.display = 'grid';
               pcBoard.style.display = 'grid';
               displayShips(playerHumanPrefix, gbHuman);
+              //call function to place bot's ships here
+              botPlaceShip();
             }
           }  
         }
@@ -541,11 +640,16 @@ makeGrid(placementBoard);
 makeGrid(humanBoard);
 makeGrid(pcBoard);
 
-userPlaceShip();
+//userPlaceShip();
+placementBoard.style.display = 'none';
 
-/*TODO: make placement board to display nonplaceable cells
-        stop user from placing ship in nonplaceable cells
+humanBoard.style.display = 'grid';
+pcBoard.style.display = 'grid';
+displayShips(playerHumanPrefix, gbHuman);
+//call function to place bot's ships here
+botPlaceShip();
+displayShips(playerPCPrefix, gbPC);
 
-        -> how: set location after drawship
+/*TODO: code bots logic to place its ships
                 
 */       
