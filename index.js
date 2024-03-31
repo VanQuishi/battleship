@@ -331,12 +331,21 @@ function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
 
+function search2DArray(arr, item) {
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i][0] == item[0] && arr[i][1] == item[1]) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function botPlaceShip() {
   let ships = [__4cShip1, __3cShip1, __3cShip2, __2cShip1, __2cShip2, __2cShip3, __1cShip1, __1cShip2, __1cShip3, __1cShip4];
   let occupiedShipLocation = [];
   let occupiedNonPlaceableLocation = [];
   let chooseAgainFlag = false;
-  //TODO: USE 2D ARRAY TO SEARCH FOR EXISTING LOCATIONS DOES NOT WORK - FIX!!!
+
   for (let k = 0; k < ships.length; k++) {
     let currentShip = ships[k];
     do {
@@ -344,12 +353,10 @@ function botPlaceShip() {
       //random axis choice (0 or 1)
       let randAxis = getRandomInt(2);
       let axis = randAxis == 0 ? hori : verti;
-      //console.log('bot place ship', axis);
       //random x and y value from 0 to 9 - this is first cell location
       let x = getRandomInt(10);
       let y = getRandomInt(10);
-      //console.log('prev location', x, y);
-      if (occupiedShipLocation.includes([x,y]) == true || occupiedNonPlaceableLocation.includes([x,y]) == true) {
+      if (search2DArray(occupiedShipLocation, [x,y]) == true || search2DArray(occupiedNonPlaceableLocation, [x,y]) == true) {
         console.log('inside first location check failed', x, y)
         chooseAgainFlag = true;
         continue;
@@ -360,7 +367,7 @@ function botPlaceShip() {
         let lastX = x + currentShip.length - 1;
         if (isLegitLocation([lastX, y])) {
           for (let i = x; i <= lastX; i++) {
-            if (occupiedShipLocation.includes([i, y]) || occupiedNonPlaceableLocation.includes([i, y])) {
+            if (search2DArray(occupiedShipLocation, [i, y]) || search2DArray(occupiedNonPlaceableLocation, [i, y])) {
               chooseAgainFlag = true;
               break;
             }
@@ -391,7 +398,7 @@ function botPlaceShip() {
         let lastY = y + currentShip.length - 1;
         if (isLegitLocation([x, lastY])) {
           for (let i = y; i <= lastY; i++) {
-            if (occupiedShipLocation.includes([x, i]) || occupiedNonPlaceableLocation.includes([x, i])) {
+            if (search2DArray(occupiedShipLocation, [x, i]) || search2DArray(occupiedNonPlaceableLocation, [x, i])) {
               chooseAgainFlag = true;
               break;
             }
