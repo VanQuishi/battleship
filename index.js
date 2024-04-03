@@ -515,6 +515,74 @@ function userPlaceShip() {
               displayShips(playerHumanPrefix, gbHuman);
               //call function to place bot's ships here
               botPlaceShip();
+              displayShips(playerPCPrefix, gbPC);
+
+              //start game here
+              //call hitACell when onlick for a cell
+              const humanCells = document.getElementsByClassName('humanCell');
+              const pcCells = document.getElementsByClassName('pcCell');
+
+              //let human play first
+              // disable click for humanBoard
+              humanBoard.style.pointerEvents = 'none';
+              humanBoard.classList.add('dimmed');
+              // enable click for pcBoard
+              pcBoard.style.pointerEvents = 'auto';
+
+              for (let i = 0; i < humanCells.length; i++) {
+                humanCells[i].addEventListener("click", () => {
+                  console.log("hit human cell");
+                  let hitCellResult = hitACell(humanCells[i]);
+                  if (hitCellResult == hitUnavailableCell) {
+                    console.log("hit unavail cell");
+                  }
+                  else if (hitCellResult == hitShipCell) {
+                    if (checkForWinner() == true) {
+                      displayMsg("Bot won! Better luck next time!");
+                    } 
+                  }
+                  else {
+                    if (checkForWinner() == false) {
+                      // disable click for humanBoard
+                      humanBoard.style.pointerEvents = 'none';
+                      humanBoard.classList.add('dimmed');
+                      // enable click for pcBoard
+                      pcBoard.style.pointerEvents = 'auto';
+                      pcBoard.classList.remove('dimmed');
+                    }  
+                  }
+                })
+              }
+
+              for (let i = 0; i < pcCells.length; i++) {
+                pcCells[i].addEventListener("click", () => {
+                  console.log("hit pc cell");
+                  let hitCellResult = hitACell(pcCells[i]);
+                  if (hitCellResult == hitUnavailableCell) {
+                    console.log("hit unavail cell");
+                  }
+                  else if (hitCellResult == hitShipCell) {
+                    if (checkForWinner() == true) {
+                      displayMsg("You won!");
+                    }
+                  }
+                  else {
+                    if (checkForWinner() == false) {
+                      // enable click for humanBoard
+                      humanBoard.style.pointerEvents = 'auto';
+                      humanBoard.classList.remove('dimmed');
+                      // disable click for pcBoard
+                      pcBoard.style.pointerEvents = 'none';
+                      pcBoard.classList.add('dimmed');
+                      let botMove = botNextMove();
+                      console.log('bot next move', botNextMove())
+                      let botCell = document.getElementById(`${0}-${botMove[0]}${botMove[1]}`);
+                      botCell.click();
+                      //if the above is a hit we need to let PC to continue hitting
+                    }  
+                  }
+                })
+              }
             }
           }  
         }
@@ -647,16 +715,16 @@ makeGrid(placementBoard);
 makeGrid(humanBoard);
 makeGrid(pcBoard);
 
-//userPlaceShip();
-placementBoard.style.display = 'none';
+userPlaceShip();
+/* placementBoard.style.display = 'none';
 
 humanBoard.style.display = 'grid';
 pcBoard.style.display = 'grid';
 displayShips(playerHumanPrefix, gbHuman);
 //call function to place bot's ships here
 botPlaceShip();
-displayShips(playerPCPrefix, gbPC);
-
-/*TODO: code bots logic to place its ships
-                
+displayShips(playerPCPrefix, gbPC); */
+ 
+/*TODO: recode setup() - maybe change name?
+  
 */       
