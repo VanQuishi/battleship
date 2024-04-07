@@ -20,10 +20,14 @@ const placementPrefix = '2';
 const hitEmptyCell = '0';
 const hitShipCell = '1';
 const hitUnavailableCell = '2';
+const hitAndSunkShip = '3';
 
-var botMoves = [];
-var prevMoveLocation = [];
-const botPrevTurn = 'rand';
+var botMovesHori = [];
+var botMovesVerti = [];
+var botMoveLocation = [];
+var botPrevTurn = 'rand';
+var guessAxis = hori;
+var isUserShipSunk = true;
 
 const gbHuman = new Gameboard();
 const gbPC = new Gameboard();
@@ -154,6 +158,7 @@ function hitACell(cell) {
     if (gb.board[x][y].ship.isSunk()) {
       console.log('sunk');
       drawNonPlaceableCells(idArr[0], gb.board[x][y].ship, true);
+      return hitAndSunkShip;
     }
     return hitShipCell;
   } else {
@@ -198,7 +203,7 @@ function botNextMove() {
   let x = 0;
   let y = 0;
 
-  if (botMoves.length == 0) {
+  if (botMovesHori.length == 0 && botMovesVerti.length == 0) {
     //if no ship is hit and botMoves array is empty, then return new random location
     if (botPrevTurn == 'rand') {
       console.log({x}, {y})
@@ -210,40 +215,45 @@ function botNextMove() {
       
       return [x, y];
     }
-    //if part of ship is hit and botMoves array is empty, fill botMoves array with legal locations in 4 directions
-    else if (botPrevTurn == 'hit') {
+    //if part of ship is hit and both botMoves array are empty, fill botMoves arrays with legal locations in 4 directions
+    else if (botPrevTurn == 'hit' && botMovesHori.length == 0 && botMovesVerti.length == 0) {
       //top
-      x = prevMoveLocation[0];
-      y = prevMoveLocation[1] - 1;
+      x = botMoveLocation[0];
+      y = botMoveLocation[1] - 1;
       if (isLegitLocation([x,y]) && gbHuman.board[x][y].isHit == false) {
-        botMoves.push([x,y]);
+        botMovesVerti.push([x,y]);
       }
 
       //bottom
-      x = prevMoveLocation[0];
-      y = prevMoveLocation[1] + 1;
+      x = botMoveLocation[0];
+      y = botMoveLocation[1] + 1;
       if (isLegitLocation([x,y]) && gbHuman.board[x][y].isHit == false) {
-        botMoves.push([x,y]);
+        botMovesVerti.push([x,y]);
       }
 
       //left
-      x = prevMoveLocation[0] - 1;
-      y = prevMoveLocation[1];
+      x = botMoveLocation[0] - 1;
+      y = botMoveLocation[1];
       if (isLegitLocation([x,y]) && gbHuman.board[x][y].isHit == false) {
-        botMoves.push([x,y]);
+        botMovesHori.push([x,y]);
       }
 
       //right
-      x = prevMoveLocation[0] + 1;
-      y = prevMoveLocation[1];
+      x = botMoveLocation[0] + 1;
+      y = botMoveLocation[1];
       if (isLegitLocation([x,y]) && gbHuman.board[x][y].isHit == false) {
-        botMoves.push([x,y]);
+        botMovesHori.push([x,y]);
       }
     }
   }
 
-  // Either ways, return one move from the array
-  return (botMoves.pop());
+  // Either ways, return one move from the array based on guessAxis
+  if (guessAxis == hori && botMovesHori.length != 0) {
+    return botMovesHori.pop();
+  }
+  else if (guessAxis == verti && botMovesVerti.length != 0) {
+    return botMovesVerti.pop();
+  }
 }
 
 function drawShip(axis, cellID, length) {
@@ -357,12 +367,12 @@ function botPlaceShip() {
       let x = getRandomInt(10);
       let y = getRandomInt(10);
       if (search2DArray(occupiedShipLocation, [x,y]) == true || search2DArray(occupiedNonPlaceableLocation, [x,y]) == true) {
-        console.log('inside first location check failed', x, y)
+        //console.log('inside first location check failed', x, y)
         chooseAgainFlag = true;
         continue;
       }
   
-      console.log("first location of ship:", x, y, axis)
+      //console.log("first location of ship:", x, y, axis)
       if (axis == hori) {
         let lastX = x + currentShip.length - 1;
         if (isLegitLocation([lastX, y])) {
@@ -372,7 +382,7 @@ function botPlaceShip() {
               break;
             }
           }
-          console.log({chooseAgainFlag});
+          //console.log({chooseAgainFlag});
           if (chooseAgainFlag == false) {
             for (let i = x; i <= lastX; i++) {
               occupiedShipLocation.push([i, y]);
@@ -384,9 +394,9 @@ function botPlaceShip() {
             }
             currentShip.axial = axis;
             gbPC.placeShip(currentShip, currentShip.locations);
-            console.log({currentShip});
+            /* console.log({currentShip});
             console.log({occupiedShipLocation});
-            console.log({occupiedNonPlaceableLocation});
+            console.log({occupiedNonPlaceableLocation}); */
           }
         }
         else {
@@ -403,7 +413,7 @@ function botPlaceShip() {
               break;
             }
           } 
-          console.log({chooseAgainFlag});
+          //console.log({chooseAgainFlag});
           if (chooseAgainFlag == false) {
             for (let i = y; i <= lastY; i++) {
               occupiedShipLocation.push([x, i]);
@@ -415,9 +425,9 @@ function botPlaceShip() {
             }
             currentShip.axial = axis;
             gbPC.placeShip(currentShip, currentShip.locations);
-            console.log({currentShip});
+            /* console.log({currentShip});
             console.log({occupiedShipLocation});
-            console.log({occupiedNonPlaceableLocation});
+            console.log({occupiedNonPlaceableLocation}); */
           }
         }
         else {
@@ -515,7 +525,7 @@ function userPlaceShip() {
               displayShips(playerHumanPrefix, gbHuman);
               //call function to place bot's ships here
               botPlaceShip();
-              displayShips(playerPCPrefix, gbPC);
+              //displayShips(playerPCPrefix, gbPC);
 
               //start game here
               //call hitACell when onlick for a cell
@@ -524,8 +534,8 @@ function userPlaceShip() {
 
               //let human play first
               // disable click for humanBoard
-              humanBoard.style.pointerEvents = 'none';
-              humanBoard.classList.add('dimmed');
+              //humanBoard.style.pointerEvents = 'none';
+              //humanBoard.classList.add('dimmed');
               // enable click for pcBoard
               pcBoard.style.pointerEvents = 'auto';
 
@@ -533,23 +543,59 @@ function userPlaceShip() {
                 humanCells[i].addEventListener("click", () => {
                   console.log("hit human cell");
                   let hitCellResult = hitACell(humanCells[i]);
+
                   if (hitCellResult == hitUnavailableCell) {
                     console.log("hit unavail cell");
                   }
                   else if (hitCellResult == hitShipCell) {
+                    displayMsg("Bot hit your ship!");
+                    botPrevTurn = "hit";
+                    isUserShipSunk = false;                   
+
+                    console.log({botMovesHori}, {botMovesVerti});
+                    botMoveLocation = botNextMove();
+                    console.log({botMoveLocation})
+                    let botCell = document.getElementById(`${0}-${botMoveLocation[0]}${botMoveLocation[1]}`);
+                    setTimeout(() => {
+                      botCell.click();
+                    }, 1000);                 
+                  }
+                  else if (hitCellResult == hitAndSunkShip) {
                     if (checkForWinner() == true) {
                       displayMsg("Bot won! Better luck next time!");
                     } 
+                    else {
+                      isUserShipSunk = true;
+                      botPrevTurn = "rand";
+                      botMovesHori = [];
+                      botMovesVerti = [];
+
+                      console.log({botMovesHori}, {botMovesVerti});
+                      botMoveLocation = botNextMove();
+                      console.log({botMoveLocation})
+                      let botCell = document.getElementById(`${0}-${botMoveLocation[0]}${botMoveLocation[1]}`);
+                      setTimeout(() => {
+                        botCell.click();
+                      }, 1000);
+                    }
                   }
                   else {
-                    if (checkForWinner() == false) {
-                      // disable click for humanBoard
-                      humanBoard.style.pointerEvents = 'none';
-                      humanBoard.classList.add('dimmed');
-                      // enable click for pcBoard
-                      pcBoard.style.pointerEvents = 'auto';
-                      pcBoard.classList.remove('dimmed');
-                    }  
+                    if (isUserShipSunk == false) {
+                      guessAxis = guessAxis == hori ? verti : hori;
+                    }
+                    else {
+                      botPrevTurn = "rand";
+                    }
+                    
+                    botMovesHori = [];
+                    botMovesVerti = [];
+
+                    // disable click for humanBoard
+                    humanBoard.style.pointerEvents = 'none';
+                    humanBoard.classList.add('dimmed');
+                    // enable click for pcBoard
+                    pcBoard.style.pointerEvents = 'auto';
+                    pcBoard.classList.remove('dimmed');
                   }
                 })
               }
@@ -574,10 +620,12 @@ function userPlaceShip() {
                       // disable click for pcBoard
                       pcBoard.style.pointerEvents = 'none';
                       pcBoard.classList.add('dimmed');
-                      let botMove = botNextMove();
-                      console.log('bot next move', botNextMove())
-                      let botCell = document.getElementById(`${0}-${botMove[0]}${botMove[1]}`);
-                      botCell.click();
+                      botMoveLocation = botNextMove();
+                      //console.log('bot next move', botNextMove());
+                      let botCell = document.getElementById(`${0}-${botMoveLocation[0]}${botMoveLocation[1]}`);
+                      setTimeout(() => { 
+                        botCell.click();
+                      }, 1000)
                       //if the above is a hit we need to let PC to continue hitting
                     }  
                   }
