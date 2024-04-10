@@ -22,11 +22,15 @@ const hitShipCell = '1';
 const hitUnavailableCell = '2';
 const hitAndSunkShip = '3';
 
-var botMovesHori = [];
-var botMovesVerti = [];
+var botMovesLeft = [];
+var botMovesRight = [];
+var botMovesTop = [];
+var botMovesBot = [];
 var botMoveLocation = [];
-var botPrevTurn = 'rand';
-var guessAxis = hori;
+var botHitStatus = 'rand';
+var botHitDirection = {0: 'left', 1: 'right', 2: 'top', 3: 'bottom'};
+let currHitDirection = botHitDirection[0];
+var availableShipsToHit = [4,3,3,2,2,2];
 var isUserShipSunk = true;
 
 const gbHuman = new Gameboard();
@@ -156,8 +160,12 @@ function hitACell(cell) {
     cell.classList.add('hitCell');
     //if the ship is sunk then display the gray area around it
     if (gb.board[x][y].ship.isSunk()) {
-      console.log('sunk');
+      //console.log('sunk');
       drawNonPlaceableCells(idArr[0], gb.board[x][y].ship, true);
+      if (idArr[0] == playerHumanPrefix) {
+        availableShipsToHit.splice(availableShipsToHit.indexOf(gb.board[x][y].ship.length), 1);
+      }
+      console.log('sunk', {availableShipsToHit});
       return hitAndSunkShip;
     }
     return hitShipCell;
@@ -202,57 +210,109 @@ function isLegitLocation(location) {
 function botNextMove() {
   let x = 0;
   let y = 0;
+  
+  //if no ship is hit and botMoves array is empty, then return new random location
+  if (botHitStatus == 'rand') {
+    do {
+      x = Math.floor(Math.random() * boardWidth);
+      y = Math.floor(Math.random() * boardWidth);
+    } while(gbHuman.board[x][y].isHit == true);
+    
+    return [x, y];
+  }
+  //if part of ship is hit and both botMoves array are empty, fill botMoves arrays with legal locations in 4 directions using longest length available
+  if (botHitStatus == 'hit' && botMovesLeft.length == 0 && botMovesRight.length == 0 && botMovesTop.length == 0 && botMovesBot.length == 0) {
+    console.log("reached inside hit and no moves populated yet");
+    let currAvailShipLength = availableShipsToHit[0];
+    console.log({currAvailShipLength}, {botMoveLocation});
 
-  if (botMovesHori.length == 0 && botMovesVerti.length == 0) {
-    //if no ship is hit and botMoves array is empty, then return new random location
-    if (botPrevTurn == 'rand') {
-      console.log({x}, {y})
-      do {
-        x = Math.floor(Math.random() * boardWidth);
-        y = Math.floor(Math.random() * boardWidth);
-        console.log({x}, {y})
-      } while(gbHuman.board[x][y].isHit == true);
-      
-      return [x, y];
-    }
-    //if part of ship is hit and both botMoves array are empty, fill botMoves arrays with legal locations in 4 directions
-    else if (botPrevTurn == 'hit' && botMovesHori.length == 0 && botMovesVerti.length == 0) {
+    for (let i = currAvailShipLength - 1; i >= 1; i--) {
+      console.log("reached inside for loop", i);
       //top
       x = botMoveLocation[0];
-      y = botMoveLocation[1] - 1;
+      y = botMoveLocation[1] - i;
       if (isLegitLocation([x,y]) && gbHuman.board[x][y].isHit == false) {
-        botMovesVerti.push([x,y]);
+        botMovesTop.push([x,y]);
       }
 
       //bottom
       x = botMoveLocation[0];
-      y = botMoveLocation[1] + 1;
+      y = botMoveLocation[1] + i;
       if (isLegitLocation([x,y]) && gbHuman.board[x][y].isHit == false) {
-        botMovesVerti.push([x,y]);
+        botMovesBot.push([x,y]);
       }
 
       //left
-      x = botMoveLocation[0] - 1;
+      x = botMoveLocation[0] - i;
       y = botMoveLocation[1];
       if (isLegitLocation([x,y]) && gbHuman.board[x][y].isHit == false) {
-        botMovesHori.push([x,y]);
+        botMovesLeft.push([x,y]);
       }
 
       //right
-      x = botMoveLocation[0] + 1;
+      x = botMoveLocation[0] + i;
       y = botMoveLocation[1];
       if (isLegitLocation([x,y]) && gbHuman.board[x][y].isHit == false) {
-        botMovesHori.push([x,y]);
+        botMovesRight.push([x,y]);
       }
     }
   }
 
-  // Either ways, return one move from the array based on guessAxis
-  if (guessAxis == hori && botMovesHori.length != 0) {
-    return botMovesHori.pop();
+  if (botHitStatus == 'hit' && isUserShipSunk == false) {
+    if (currHitDirection == botHitDirection[0]) {
+      if (botMovesLeft.length > 0) {
+        return botMovesLeft.pop();
+      }
+      else {
+        currHitDirection = botHitDirection[1];
+      }
+    }
+    else if (currHitDirection == botHitDirection[1]) {
+      if (botMovesRight.length > 0) {
+        return botMovesRight.pop();
+      }
+      else {
+        currHitDirection = botHitDirection[2];
+      }
+    }
+    else if (currHitDirection == botHitDirection[2]) {
+      if (botMovesTop.length > 0) {
+        return botMovesTop.pop();
+      }
+      else {
+        currHitDirection = botHitDirection[3];
+      }
+    }
+    else if (currHitDirection == botHitDirection[3]) {
+      if (botMovesBot.length > 0) {
+        currHitDirection = botHitDirection[4];
+        return botMovesBot.pop();
+      }
+    }
+
+    /* switch(currHitDirection) {
+      case botHitDirection[0]:
+        return botMovesLeft.pop();
+      case botHitDirection[1]:
+        return botMovesRight.pop();
+      case botHitDirection[2]:
+        return botMovesTop.pop();
+      case botHitDirection[3]:
+        return botMovesBot.pop();
+    } */
   }
-  else if (guessAxis == verti && botMovesVerti.length != 0) {
-    return botMovesVerti.pop();
+  else if (botHitStatus == 'missed' && isUserShipSunk == false) {
+    switch(currHitDirection) {
+      case botHitDirection[0]:
+        currHitDirection = botHitDirection[1];
+        return botMovesRight.pop();
+      case botHitDirection[1]:
+        currHitDirection = botHitDirection[2];
+        return botMovesTop.pop();
+      case botHitDirection[2]:
+        currHitDirection = botHitDirection[3];
+        return botMovesBot.pop();
+    }
   }
 }
 
@@ -549,11 +609,12 @@ function userPlaceShip() {
                   }
                   else if (hitCellResult == hitShipCell) {
                     displayMsg("Bot hit your ship!");
-                    botPrevTurn = "hit";
+                    botHitStatus = "hit";
                     isUserShipSunk = false;                   
 
-                    console.log({botMovesHori}, {botMovesVerti});
+                    //console.log({botMovesBot}, {botMovesTop}, {botMovesLeft}, {botMovesRight});
                     botMoveLocation = botNextMove();
+                    //console.log({botMovesBot}, {botMovesTop}, {botMovesLeft}, {botMovesRight});
                     console.log({botMoveLocation})
                     let botCell = document.getElementById(`${0}-${botMoveLocation[0]}${botMoveLocation[1]}`);
                     setTimeout(() => {
@@ -566,11 +627,12 @@ function userPlaceShip() {
                     } 
                     else {
                       isUserShipSunk = true;
-                      botPrevTurn = "rand";
-                      botMovesHori = [];
-                      botMovesVerti = [];
+                      botHitStatus = "rand";
+                      botMovesLeft = [];
+                      botMovesRight = [];
+                      botMovesTop = [];
+                      botMovesBot = [];
 
-                      console.log({botMovesHori}, {botMovesVerti});
                       botMoveLocation = botNextMove();
                       console.log({botMoveLocation})
                       let botCell = document.getElementById(`${0}-${botMoveLocation[0]}${botMoveLocation[1]}`);
@@ -580,16 +642,19 @@ function userPlaceShip() {
                     }
                   }
                   else {
-                    if (isUserShipSunk == false) {
-                      guessAxis = guessAxis == hori ? verti : hori;
-                    }
-                    else {
-                      botPrevTurn = "rand";
+                    /*2 cases when bot hit an empty cell:
+                    - randomly hit a cell to find a ship
+                    - already found the ship but haven't found the right direction
+                    */
+                    if (botHitStatus == 'hit') {
+                      botHitStatus = 'missed';
+                    } else {
+                      botMovesLeft = [];
+                      botMovesRight = [];
+                      botMovesBot = [];
+                      botMovesTop = [];
                     }
                     
-                    botMovesHori = [];
-                    botMovesVerti = [];
-
                     // disable click for humanBoard
                     humanBoard.style.pointerEvents = 'none';
                     humanBoard.classList.add('dimmed');
@@ -621,8 +686,9 @@ function userPlaceShip() {
                       pcBoard.style.pointerEvents = 'none';
                       pcBoard.classList.add('dimmed');
                       botMoveLocation = botNextMove();
-                      //console.log('bot next move', botNextMove());
+                      console.log('bot next move', botMoveLocation);
                       let botCell = document.getElementById(`${0}-${botMoveLocation[0]}${botMoveLocation[1]}`);
+                      console.log({botCell});
                       setTimeout(() => { 
                         botCell.click();
                       }, 1000)
@@ -752,7 +818,6 @@ function setup() {
           // disable click for pcBoard
           pcBoard.style.pointerEvents = 'none';
           pcBoard.classList.add('dimmed');
-          console.log('bot next move', botNextMove())
         }  
       }
     })
