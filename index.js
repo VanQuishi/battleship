@@ -30,7 +30,7 @@ var botMoveLocation = [];
 var botHitStatus = 'rand';
 var botHitDirection = {0: 'left', 1: 'right', 2: 'top', 3: 'bottom'};
 let currHitDirection = botHitDirection[0];
-var availableShipsToHit = [4,3,3,2,2,2];
+var availableShipsToHit = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1];
 var isUserShipSunk = true;
 
 const gbHuman = new Gameboard();
@@ -122,7 +122,7 @@ function displayShips(user, gameboard) {
 }
 
 function drawNonPlaceableCells(user, ship, isPermanent) {
-  console.log("hit display gray cells")
+  //console.log("hit display gray cells")
   for (let i = 0; i < ship.nonPlaceableCells.length; i++) {
     let cellID = `${user}-${ship.nonPlaceableCells[i][0]}${ship.nonPlaceableCells[i][1]}`;
     let cell = document.getElementById(cellID);
@@ -163,6 +163,7 @@ function hitACell(cell) {
       //console.log('sunk');
       drawNonPlaceableCells(idArr[0], gb.board[x][y].ship, true);
       if (idArr[0] == playerHumanPrefix) {
+        console.log('ship length', gb.board[x][y].ship.length);
         availableShipsToHit.splice(availableShipsToHit.indexOf(gb.board[x][y].ship.length), 1);
       }
       console.log('sunk', {availableShipsToHit});
@@ -223,12 +224,10 @@ function botNextMove() {
   }
   //if part of ship is hit and both botMoves array are empty, fill botMoves arrays with legal locations in 4 directions using longest length available
   if (botHitStatus == 'hit' && botMovesLeft.length == 0 && botMovesRight.length == 0 && botMovesTop.length == 0 && botMovesBot.length == 0) {
-    console.log("reached inside hit and no moves populated yet");
     let currAvailShipLength = availableShipsToHit[0];
     console.log({currAvailShipLength}, {botMoveLocation});
 
     for (let i = currAvailShipLength - 1; i >= 1; i--) {
-      console.log("reached inside for loop", i);
       //top
       x = botMoveLocation[0];
       y = botMoveLocation[1] - i;
@@ -299,12 +298,15 @@ function botNextMove() {
     switch(currHitDirection) {
       case botHitDirection[0]:
         currHitDirection = botHitDirection[1];
+        break;
         //return botMovesRight.pop();
       case botHitDirection[1]:
         currHitDirection = botHitDirection[2];
+        break;
         //return botMovesTop.pop();
       case botHitDirection[2]:
         currHitDirection = botHitDirection[3];
+        break;
         //return botMovesBot.pop();
     }
 
@@ -494,9 +496,9 @@ function botPlaceShip() {
             }
             currentShip.axial = axis;
             gbPC.placeShip(currentShip, currentShip.locations);
-            /* console.log({currentShip});
-            console.log({occupiedShipLocation});
-            console.log({occupiedNonPlaceableLocation}); */
+            console.log({currentShip}, currentShip.locations);
+            //console.log({occupiedShipLocation});
+            //console.log({occupiedNonPlaceableLocation});
           }
         }
         else {
@@ -525,9 +527,9 @@ function botPlaceShip() {
             }
             currentShip.axial = axis;
             gbPC.placeShip(currentShip, currentShip.locations);
-            /* console.log({currentShip});
-            console.log({occupiedShipLocation});
-            console.log({occupiedNonPlaceableLocation}); */
+            console.log({currentShip}, currentShip.locations);
+            //console.log({occupiedShipLocation});
+            //console.log({occupiedNonPlaceableLocation});
           }
         }
         else {
@@ -694,7 +696,7 @@ function userPlaceShip() {
                       botMovesRight = [];
                       botMovesBot = [];
                       botMovesTop = [];
-                    } else if (botHitDirection == 'hit') {
+                    } else if (botHitStatus == 'hit') {
                       botHitStatus = 'missed';
                     }
                     
