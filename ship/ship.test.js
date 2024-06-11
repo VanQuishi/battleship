@@ -50,7 +50,7 @@ describe('findNonPlaceableCells()', () => {
     expect(shipObj.nonPlaceableCells).toEqual(expect.arrayContaining(expectedNonPlaceableCells));
   });
 
-  test('findNonPlaceableCells() for vertical ship', () => { 
+  test('findNonPlaceableCells() for horizontal ship', () => { 
     let expectedNonPlaceableCells = [[2,0], [0,1], [1,1], [2,1]];
     shipObj.axial = hori;
     shipObj.locations = [[0,0], [1,0]];
@@ -68,6 +68,25 @@ describe('findNonPlaceableCells()', () => {
 
     expect(shipObj.locations.length).toEqual(1)
     //expect(shipObj.nonPlaceableCells.length).toEqual(expectedNonPlaceableCells.length);
+    expect(shipObj.nonPlaceableCells).toEqual(expect.arrayContaining(expectedNonPlaceableCells));
+  });
+
+  test('findNonPlaceableCells() for horizontal ship - length of 2', () => { 
+    let expectedNonPlaceableCells = [[2,4], [5,4], [2,3], [3,3], [4,3], [5,3], [2,5], [3,5], [4,5], [5,5]];
+    shipObj.axial = hori;
+    shipObj.locations = [[3,4], [4,4]];
+    shipObj.findNonPlaceableCells();
+
+    //expect(shipObj.nonPlaceableCells.length).toEqual(expectedNonPlaceableCells.length);
+    expect(shipObj.nonPlaceableCells).toEqual(expect.arrayContaining(expectedNonPlaceableCells));
+  });
+
+  test('findNonPlaceableCells() for horizontal ship - length of 3', () => { 
+    let expectedNonPlaceableCells = [[4, 7], [3, 7], [5, 7], [3, 9], [5, 9], [6, 7], [4, 9], [6, 9], [7, 7], [7, 9], [3, 8], [7, 8]];
+    shipObj.axial = hori;
+    shipObj.locations = [[4, 8], [5, 8], [6, 8]];
+    shipObj.findNonPlaceableCells();
+
     expect(shipObj.nonPlaceableCells).toEqual(expect.arrayContaining(expectedNonPlaceableCells));
   });
 })

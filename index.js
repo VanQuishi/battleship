@@ -108,9 +108,7 @@ function displayShips(user, gameboard) {
     for (let x = 0; x < boardWidth; x++) {
       if (gameboard.board[x][y].ship != null) {
         let cellID = `${user}-${x}${y}`;
-        console.log({cellID});
         let cell = document.getElementById(cellID);
-        console.log({cell})
         cell.classList.add('chosenCell');
         // only display the user's ships. hide the bot's
 /*         if (user == playerHumanPrefix) {
@@ -161,12 +159,12 @@ function hitACell(cell) {
     //if the ship is sunk then display the gray area around it
     if (gb.board[x][y].ship.isSunk()) {
       //console.log('sunk');
+      console.log('sunk', gb.board[x][y].ship);
       drawNonPlaceableCells(idArr[0], gb.board[x][y].ship, true);
       if (idArr[0] == playerHumanPrefix) {
         console.log('ship length', gb.board[x][y].ship.length);
         availableShipsToHit.splice(availableShipsToHit.indexOf(gb.board[x][y].ship.length), 1);
       }
-      console.log('sunk', {availableShipsToHit});
       return hitAndSunkShip;
     }
     return hitShipCell;
@@ -490,11 +488,13 @@ function botPlaceShip() {
               occupiedShipLocation.push([i, y]);
               currentShip.locations.push([i, y]);
             } 
+            currentShip.axial = axis;
             currentShip.findNonPlaceableCells();
+            console.log('pc placed ship', currentShip);
             for (let i = 0; i < currentShip.nonPlaceableCells.length; i++) {
               occupiedNonPlaceableLocation.push(currentShip.nonPlaceableCells[i]);
             }
-            currentShip.axial = axis;
+            //currentShip.axial = axis;
             gbPC.placeShip(currentShip, currentShip.locations);
             console.log({currentShip}, currentShip.locations);
             //console.log({occupiedShipLocation});
@@ -521,11 +521,13 @@ function botPlaceShip() {
               occupiedShipLocation.push([x, i]);
               currentShip.locations.push([x, i]);
             } 
+            currentShip.axial = axis;
             currentShip.findNonPlaceableCells();
+            console.log('pc placed ship', currentShip);
             for (let i = 0; i < currentShip.nonPlaceableCells.length; i++) {
               occupiedNonPlaceableLocation.push(currentShip.nonPlaceableCells[i]);
             }
-            currentShip.axial = axis;
+            //currentShip.axial = axis;
             gbPC.placeShip(currentShip, currentShip.locations);
             console.log({currentShip}, currentShip.locations);
             //console.log({occupiedShipLocation});
@@ -604,7 +606,7 @@ function userPlaceShip() {
 
       cell.addEventListener('click', (e) => {
         if (!cell.classList.contains('chosenCell') && !cell.classList.contains('permanentMissedCell')) {
-          if (msgBox.innerHTML != outOfBoundErrMsg || msgBox.innerHTML != overlappedErrMsg) {
+          if (msgBox.innerHTML != outOfBoundErrMsg && msgBox.innerHTML != overlappedErrMsg) {
             gbHuman.placeShip(currentShip, shipLocationArr);
 
             for (let i = 0; i < shipLocationArr.length; i++) {
@@ -627,7 +629,7 @@ function userPlaceShip() {
               displayShips(playerHumanPrefix, gbHuman);
               //call function to place bot's ships here
               botPlaceShip();
-              //displayShips(playerPCPrefix, gbPC);
+              displayShips(playerPCPrefix, gbPC);
 
               //start game here
               //call hitACell when onlick for a cell
@@ -718,7 +720,7 @@ function userPlaceShip() {
                   }
                   else if (hitCellResult == hitShipCell) {
                     if (checkForWinner() == true) {
-                      displayMsg("You won!");
+                      displayMsg("PC won!");
                     }
                   }
                   else {
@@ -747,126 +749,6 @@ function userPlaceShip() {
         }
       });
   });
-}
-
-function setup() {
-  //preset gameboardHuman
-  /* gbHuman.placeShip(_5cShip, [[4,9], [5,9], [6,9], [7,9], [8,9]]);
-  _5cShip.findNonPlaceableCells();
-
-  gbHuman.placeShip(_4cShip1, [[6,0], [7,0], [8,0], [9,0]]);
-  _4cShip1.findNonPlaceableCells();
-  gbHuman.placeShip(_4cShip2, [[0,2], [0,3], [0,4], [0,5]]);
-  _4cShip2.findNonPlaceableCells();
-
-  gbHuman.placeShip(_3cShip1, [[3,0], [3,1], [3,2]]);
-  _3cShip1.findNonPlaceableCells();
-  gbHuman.placeShip(_3cShip2, [[5,2], [6,2], [7,2]]);
-  _3cShip2.findNonPlaceableCells();
-  gbHuman.placeShip(_3cShip3, [[9,5], [9,6], [9,7]]);
-  _3cShip3.findNonPlaceableCells();
-
-  gbHuman.placeShip(_2cShip1, [[0,0], [1,0]]);
-  _2cShip1.findNonPlaceableCells();
-  gbHuman.placeShip(_2cShip2, [[0, 7], [1,7]]);
-  _2cShip2.findNonPlaceableCells();
-  gbHuman.placeShip(_2cShip3, [[5,5], [5,6]]);
-  _2cShip3.findNonPlaceableCells();
-  gbHuman.placeShip(_2cShip4, [[9,2], [9,3]]);
-  _2cShip4.findNonPlaceableCells(); */
-
-  userPlaceShip();
-
-  //preset gameboardPC
-  gbPC.placeShip(__5cShip, [[4,9], [5,9], [6,9], [7,9], [8,9]]);
-  __5cShip.findNonPlaceableCells();
-
-  gbPC.placeShip(__4cShip1, [[6,0], [7,0], [8,0], [9,0]]);
-  __4cShip1.findNonPlaceableCells();
-  gbPC.placeShip(__4cShip2, [[0,2], [0,3], [0,4], [0,5]]);
-  __4cShip2.findNonPlaceableCells();
-
-  gbPC.placeShip(__3cShip1, [[3,0], [3,1], [3,2]]);
-  __3cShip1.findNonPlaceableCells();
-  gbPC.placeShip(__3cShip2, [[5,2], [6,2], [7,2]]);
-  __3cShip2.findNonPlaceableCells();
-  gbPC.placeShip(__3cShip3, [[9,5], [9,6], [9,7]]);
-  __3cShip3.findNonPlaceableCells();
-
-  gbPC.placeShip(__2cShip1, [[0,0], [1,0]]);
-  __2cShip1.findNonPlaceableCells();
-  gbPC.placeShip(__2cShip2, [[0, 7], [1,7]]);
-  __2cShip2.findNonPlaceableCells();
-  gbPC.placeShip(__2cShip3, [[5,5], [5,6]]);
-  __2cShip3.findNonPlaceableCells();
-  gbPC.placeShip(__2cShip4, [[9,2], [9,3]]);
-  __2cShip4.findNonPlaceableCells();
-
-  //console.log(boardsWrapper)
-  makeGrid();
-  //display human ships on board - Done
-  displayShips(playerHumanPrefix, gbHuman);
-
-  //call hitACell when onlick for a cell
-  const humanCells = document.getElementsByClassName('humanCell');
-  const pcCells = document.getElementsByClassName('pcCell');
-
-  //let human play first
-  // disable click for humanBoard
-  humanBoard.style.pointerEvents = 'none';
-  humanBoard.classList.add('dimmed');
-  // enable click for pcBoard
-  pcBoard.style.pointerEvents = 'auto';
-
-  for (let i = 0; i < humanCells.length; i++) {
-    humanCells[i].addEventListener("click", () => {
-      console.log("hit human cell");
-      let hitCellResult = hitACell(humanCells[i]);
-      if (hitCellResult == hitUnavailableCell) {
-        console.log("hit unavail cell");
-      }
-      else if (hitCellResult == hitShipCell) {
-        if (checkForWinner() == true) {
-          displayMsg("Bot won! Better luck next time!");
-        } 
-      }
-      else {
-        if (checkForWinner() == false) {
-          // disable click for humanBoard
-          humanBoard.style.pointerEvents = 'none';
-          humanBoard.classList.add('dimmed');
-          // enable click for pcBoard
-          pcBoard.style.pointerEvents = 'auto';
-          pcBoard.classList.remove('dimmed');
-        }  
-      }
-    })
-  }
-
-  for (let i = 0; i < pcCells.length; i++) {
-    pcCells[i].addEventListener("click", () => {
-      console.log("hit pc cell");
-      let hitCellResult = hitACell(pcCells[i]);
-      if (hitCellResult == hitUnavailableCell) {
-        console.log("hit unavail cell");
-      }
-      else if (hitCellResult == hitShipCell) {
-        if (checkForWinner() == true) {
-          displayMsg("You won!");
-        }
-      }
-      else {
-        if (checkForWinner() == false) {
-          // enable click for humanBoard
-          humanBoard.style.pointerEvents = 'auto';
-          humanBoard.classList.remove('dimmed');
-          // disable click for pcBoard
-          pcBoard.style.pointerEvents = 'none';
-          pcBoard.classList.add('dimmed');
-        }  
-      }
-    })
-  }
 }
 
 makeGrid(placementBoard);
