@@ -33,6 +33,9 @@ let currHitDirection = botHitDirection[0];
 var availableShipsToHit = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1];
 var isUserShipSunk = true;
 
+var UI_userNewestHitCell = null;
+var UI_pcNewestHitCell = null;
+
 const gbHuman = new Gameboard();
 const gbPC = new Gameboard();
 
@@ -152,10 +155,32 @@ function hitACell(cell) {
 
   let gb = idArr[0] == playerHumanPrefix ? gbHuman : gbPC;
 
+  //display newest cell that was hit
+  if (gb == gbHuman) {
+    if (UI_userNewestHitCell == null) {
+      UI_userNewestHitCell = cell;
+    } else {
+      UI_userNewestHitCell.classList.remove('newestHitCell');
+      UI_userNewestHitCell = cell;
+    }
+    UI_userNewestHitCell.classList.add('newestHitCell');
+  }
+  else {
+    if (UI_pcNewestHitCell == null) {
+      UI_pcNewestHitCell = cell;
+    } else {
+      UI_pcNewestHitCell.classList.remove('newestHitCell');
+      UI_pcNewestHitCell = cell;
+    }
+    UI_pcNewestHitCell.classList.add('newestHitCell');
+  }
+  // =========
+
   gb.receiveAttack([x, y]);
 
   if (gb.board[x][y].ship != null) {
     cell.classList.add('hitCell');
+    //cell.classList.add('lastHitCell');
     //if the ship is sunk then display the gray area around it
     if (gb.board[x][y].ship.isSunk()) {
       //console.log('sunk');
@@ -177,7 +202,7 @@ function hitACell(cell) {
 function checkForWinner() {
   if (gbPC.areAllShipsSunk()) {
     //announce human won
-    console.log("PC won");
+    console.log("Human won");
     return true;
   }
   if (gbHuman.areAllShipsSunk()) {

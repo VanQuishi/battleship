@@ -47,7 +47,7 @@ h1, h2, h3, h4, h5, h6{
   gap: 1px;
 }
 
-.board .cell {
+.cell {
   border: 1px solid black;
 }
 
@@ -67,7 +67,7 @@ h1, h2, h3, h4, h5, h6{
 }
 
 .hitCell {
-  border: 2px solid #ff8080 !important;
+  border: 2px solid #ff8080;
   background-color: #fff1f1;
   background: 
          linear-gradient(to top left,
@@ -85,6 +85,10 @@ h1, h2, h3, h4, h5, h6{
 }
 .hitCell:hover{
   cursor: not-allowed;
+}
+
+.newestHitCell {
+  border: 3px solid #bb43e6;
 }
 
 .dimmed{
