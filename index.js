@@ -190,6 +190,11 @@ function hitACell(cell) {
         console.log('ship length', gb.board[x][y].ship.length);
         availableShipsToHit.splice(availableShipsToHit.indexOf(gb.board[x][y].ship.length), 1);
       }
+
+      //call gb.receiveAttack() on all sunk ship's nonPlaceableCells
+      for (var i = 0; i < gb.board[x][y].ship.nonPlaceableCells.length; i++) {
+        gb.receiveAttack(gb.board[x][y].ship.nonPlaceableCells[i]);
+      }
       return hitAndSunkShip;
     }
     return hitShipCell;
@@ -241,6 +246,7 @@ function botNextMove() {
     do {
       x = Math.floor(Math.random() * boardWidth);
       y = Math.floor(Math.random() * boardWidth);
+      console.log('isHit', x, y, gbHuman.board[x][y].isHit);
     } while(gbHuman.board[x][y].isHit == true);
     
     return [x, y];
@@ -521,7 +527,7 @@ function botPlaceShip() {
             }
             //currentShip.axial = axis;
             gbPC.placeShip(currentShip, currentShip.locations);
-            console.log({currentShip}, currentShip.locations);
+            //console.log({currentShip}, currentShip.locations);
             //console.log({occupiedShipLocation});
             //console.log({occupiedNonPlaceableLocation});
           }
