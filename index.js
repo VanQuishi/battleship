@@ -71,6 +71,7 @@ var __1cShip4 = new Ship(1, verti);
 
 const outOfBoundErrMsg = "Ship is out of bound. Can't be placed.";
 const overlappedErrMsg = "Cannot overlap your ship";
+const placeShipMsg = "Press R key to change the rotation of your ship. Click to place ship.";
 
 function makeGrid(board) {
 
@@ -237,7 +238,7 @@ function isLegitLocation(location) {
 //TODO: allows user to rotate ship's axis
 
 function botNextMove() {
-  console.log('botNextMove', {botHitStatus}, {isUserShipSunk}, {currHitDirection})
+  console.log('botPrevMove', {botHitStatus}, {isUserShipSunk}, {currHitDirection})
   let x = 0;
   let y = 0;
   
@@ -286,6 +287,7 @@ function botNextMove() {
       }
     }
   }
+  console.log({botMovesBot}, {botMovesTop}, {botMovesLeft}, {botMovesRight});
 
   if (botHitStatus == 'hit' && isUserShipSunk == false) {
     if (currHitDirection == botHitDirection[0]) {
@@ -297,7 +299,7 @@ function botNextMove() {
         currHitDirection = botHitDirection[1];
       }
     }
-    else if (currHitDirection == botHitDirection[1]) {
+    if (currHitDirection == botHitDirection[1]) {
       if (botMovesRight.length > 0) {
         console.log('right', botMovesRight[botMovesRight.length-1]);
         //return botMovesRight.pop();
@@ -306,7 +308,7 @@ function botNextMove() {
         currHitDirection = botHitDirection[2];
       }
     }
-    else if (currHitDirection == botHitDirection[2]) {
+    if (currHitDirection == botHitDirection[2]) {
       if (botMovesTop.length > 0) {
         console.log('top', botMovesTop[botMovesTop.length-1]);
         //return botMovesTop.pop();
@@ -315,10 +317,10 @@ function botNextMove() {
         currHitDirection = botHitDirection[3];
       }
     }
-    else if (currHitDirection == botHitDirection[3]) {
+    if (currHitDirection == botHitDirection[3]) {
       if (botMovesBot.length > 0) {
         console.log('bottom', botMovesBot[botMovesBot.length-1]);
-        currHitDirection = botHitDirection[4];
+        //currHitDirection = botHitDirection[4];
         //return botMovesBot.pop();
       }
     }
@@ -348,7 +350,7 @@ function botNextMove() {
         currHitDirection = botHitDirection[1];
       }
     }
-    else if (currHitDirection == botHitDirection[1]) {
+    if (currHitDirection == botHitDirection[1]) {
       if (botMovesRight.length > 0) {
         console.log('right', botMovesRight[botMovesRight.length-1]);
         //return botMovesRight.pop();
@@ -357,7 +359,7 @@ function botNextMove() {
         currHitDirection = botHitDirection[2];
       }
     }
-    else if (currHitDirection == botHitDirection[2]) {
+    if (currHitDirection == botHitDirection[2]) {
       if (botMovesTop.length > 0) {
         console.log('top', botMovesTop[botMovesTop.length-1]);
         //return botMovesTop.pop();
@@ -366,15 +368,15 @@ function botNextMove() {
         currHitDirection = botHitDirection[3];
       }
     }
-    else if (currHitDirection == botHitDirection[3]) {
+    if (currHitDirection == botHitDirection[3]) {
       if (botMovesBot.length > 0) {
         console.log('bottom', botMovesBot[botMovesBot.length-1]);
-        currHitDirection = botHitDirection[4];
+        //currHitDirection = botHitDirection[4];
         //return botMovesBot.pop();
       }
     }
   }
-
+  console.log('botNextMove', {botHitStatus}, {isUserShipSunk}, {currHitDirection});
   switch(currHitDirection) {
       case botHitDirection[0]:
         return botMovesLeft.pop();
@@ -409,7 +411,7 @@ function drawShip(axis, cellID, length) {
         cell.classList.add('drawnCell');
         shipLocationArr.push([i, y]);
       }
-      displayMsg("Place your ship.");
+      displayMsg(placeShipMsg);
     } else {
       displayMsg(outOfBoundErrMsg);
       return [];
@@ -429,7 +431,7 @@ function drawShip(axis, cellID, length) {
         cell.classList.add('drawnCell');
         shipLocationArr.push([x, i]);
       }
-      displayMsg("Place your ship.");
+      displayMsg(placeShipMsg);
     } else {
       displayMsg(outOfBoundErrMsg);
       return [];
@@ -654,13 +656,14 @@ function userPlaceShip() {
             }
             else {
               placementBoard.style.display = 'none';
+              displayMsg("Game begin!")
 
               humanBoard.style.display = 'grid';
               pcBoard.style.display = 'grid';
               displayShips(playerHumanPrefix, gbHuman);
               //call function to place bot's ships here
               botPlaceShip();
-              displayShips(playerPCPrefix, gbPC);
+              //rdisplayShips(playerPCPrefix, gbPC);
 
               //start game here
               //call hitACell when onlick for a cell
@@ -669,7 +672,7 @@ function userPlaceShip() {
 
               //let human play first
               // disable click for humanBoard
-              //humanBoard.style.pointerEvents = 'none';
+              humanBoard.style.pointerEvents = 'none';
               //humanBoard.classList.add('dimmed');
               // enable click for pcBoard
               pcBoard.style.pointerEvents = 'auto';
@@ -689,12 +692,12 @@ function userPlaceShip() {
 
                     //console.log({botMovesBot}, {botMovesTop}, {botMovesLeft}, {botMovesRight});
                     botMoveLocation = botNextMove();
-                    console.log({botMovesBot}, {botMovesTop}, {botMovesLeft}, {botMovesRight});
                     console.log({botMoveLocation})
                     let botCell = document.getElementById(`${0}-${botMoveLocation[0]}${botMoveLocation[1]}`);
-                    setTimeout(() => {
+                    botCell.click();
+                    /* setTimeout(() => {
                       botCell.click();
-                    }, 1000);                 
+                    }, 1000);    */              
                   }
                   else if (hitCellResult == hitAndSunkShip) {
                     if (checkForWinner() == true) {
@@ -713,9 +716,10 @@ function userPlaceShip() {
                       console.log({botMovesBot}, {botMovesTop}, {botMovesLeft}, {botMovesRight});
                       console.log({botMoveLocation})
                       let botCell = document.getElementById(`${0}-${botMoveLocation[0]}${botMoveLocation[1]}`);
-                      setTimeout(() => {
+                      botCell.click();
+                      /* setTimeout(() => {
                         botCell.click();
-                      }, 1000);
+                      }, 1000); */
                     }
                   }
                   else {
@@ -735,7 +739,7 @@ function userPlaceShip() {
                     
                     // disable click for humanBoard
                     humanBoard.style.pointerEvents = 'none';
-                    humanBoard.classList.add('dimmed');
+                    //humanBoard.classList.add('dimmed');
                     // enable click for pcBoard
                     pcBoard.style.pointerEvents = 'auto';
                     pcBoard.classList.remove('dimmed');
@@ -751,7 +755,7 @@ function userPlaceShip() {
                   }
                   else if (hitCellResult == hitShipCell) {
                     if (checkForWinner() == true) {
-                      displayMsg("PC won!");
+                      displayMsg("Human won! Better luck next time!");
                     }
                   }
                   else {
@@ -767,9 +771,10 @@ function userPlaceShip() {
                       console.log({botMoveLocation});
                       let botCell = document.getElementById(`${0}-${botMoveLocation[0]}${botMoveLocation[1]}`);
                       console.log({botCell});
-                      setTimeout(() => { 
+                      botCell.click();
+                      /* setTimeout(() => { 
                         botCell.click();
-                      }, 1000)
+                      }, 1000) */
                       //if the above is a hit we need to let PC to continue hitting
                     }  
                   }

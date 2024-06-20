@@ -91,6 +91,10 @@ h1, h2, h3, h4, h5, h6{
   border: 3px solid #bb43e6;
 }
 
-.dimmed{
+.dimmed {
   opacity: 0.3;
+}
+
+.humanCell:hover{
+  cursor: not-allowed;
 }
