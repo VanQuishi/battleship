@@ -11,8 +11,6 @@ const msgBox = document.getElementById('msg');
 
 const boardWidth = 10;
 
-const playerHuman = new Player('Nin');
-const playerPC = new Player('Bot');
 const playerHumanPrefix = '0';
 const playerPCPrefix = '1';
 const placementPrefix = '2';
@@ -72,6 +70,7 @@ var __1cShip4 = new Ship(1, verti);
 const outOfBoundErrMsg = "Ship is out of bound. Can't be placed.";
 const overlappedErrMsg = "Cannot overlap your ship";
 const placeShipMsg = "Press R key to change the rotation of your ship. Click to place ship.";
+const beginGameMsg = "Game begin! It's your turn. Click on the bot's board to attack.";
 
 function makeGrid(board) {
 
@@ -656,7 +655,7 @@ function userPlaceShip() {
             }
             else {
               placementBoard.style.display = 'none';
-              displayMsg("Game begin!")
+              displayMsg(beginGameMsg);
 
               humanBoard.style.display = 'grid';
               pcBoard.style.display = 'grid';
@@ -686,7 +685,7 @@ function userPlaceShip() {
                     console.log("hit unavail cell");
                   }
                   else if (hitCellResult == hitShipCell) {
-                    displayMsg("Bot hit your ship!");
+                    displayMsg("Bot hit your ship! Bot continues its turn.");
                     botHitStatus = "hit";
                     isUserShipSunk = false;                   
 
@@ -694,10 +693,10 @@ function userPlaceShip() {
                     botMoveLocation = botNextMove();
                     console.log({botMoveLocation})
                     let botCell = document.getElementById(`${0}-${botMoveLocation[0]}${botMoveLocation[1]}`);
-                    botCell.click();
-                    /* setTimeout(() => {
+                    //botCell.click();
+                    setTimeout(() => {
                       botCell.click();
-                    }, 1000);    */              
+                    }, 500);            
                   }
                   else if (hitCellResult == hitAndSunkShip) {
                     if (checkForWinner() == true) {
@@ -716,13 +715,14 @@ function userPlaceShip() {
                       console.log({botMovesBot}, {botMovesTop}, {botMovesLeft}, {botMovesRight});
                       console.log({botMoveLocation})
                       let botCell = document.getElementById(`${0}-${botMoveLocation[0]}${botMoveLocation[1]}`);
-                      botCell.click();
-                      /* setTimeout(() => {
+                      //botCell.click();
+                      setTimeout(() => {
                         botCell.click();
-                      }, 1000); */
+                      }, 500);
                     }
                   }
                   else {
+                    displayMsg("Bot missed. Your turn.")
                     /*2 cases when bot hit an empty cell:
                     - randomly hit a cell to find a ship
                     - already found the ship but haven't found the right direction
@@ -752,13 +752,18 @@ function userPlaceShip() {
                   let hitCellResult = hitACell(pcCells[i]);
                   if (hitCellResult == hitUnavailableCell) {
                     console.log("hit unavail cell");
+                    displayMsg("Cannot attack here. Try again.");
                   }
                   else if (hitCellResult == hitShipCell) {
                     if (checkForWinner() == true) {
-                      displayMsg("Human won! Better luck next time!");
+                      displayMsg("Congratulations! You won!");
+                    }
+                    else {
+                      displayMsg("You hit a ship! Continue you turn.");
                     }
                   }
                   else {
+                    displayMsg("You missed. Bot's turn.")
                     if (checkForWinner() == false) {
                       // enable click for humanBoard
                       humanBoard.style.pointerEvents = 'auto';
@@ -771,10 +776,10 @@ function userPlaceShip() {
                       console.log({botMoveLocation});
                       let botCell = document.getElementById(`${0}-${botMoveLocation[0]}${botMoveLocation[1]}`);
                       console.log({botCell});
-                      botCell.click();
-                      /* setTimeout(() => { 
+                      //botCell.click();
+                      setTimeout(() => { 
                         botCell.click();
-                      }, 1000) */
+                      }, 500);
                       //if the above is a hit we need to let PC to continue hitting
                     }  
                   }

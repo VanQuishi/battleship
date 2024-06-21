@@ -35,7 +35,7 @@ h1, h2, h3, h4, h5, h6{
   gap: 10rem;
   justify-content: center;
   align-items: center;
-  padding: 1rem;;
+  padding: 1rem;
 }
 
 .board {
@@ -97,4 +97,11 @@ h1, h2, h3, h4, h5, h6{
 
 .humanCell:hover{
   cursor: not-allowed;
+}
+
+.titleWrapper {
+  display: flex;
+  gap: 30rem;
+  justify-content: center;
+  align-items: center;
 }
