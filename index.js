@@ -8,6 +8,7 @@ const placementBoard = document.getElementById('placementBoard');
 const humanBoard = document.getElementById('humanBoard');
 const pcBoard = document.getElementById('pcBoard');
 const msgBox = document.getElementById('msg');
+const titleWrapper = document.getElementById('titleWrapper');
 
 const boardWidth = 10;
 
@@ -616,6 +617,7 @@ function userPlaceShip() {
     }
   });
 
+  displayMsg(placeShipMsg);
   var placementCells = document.querySelectorAll('.placementCell');
 
   placementCells.forEach((cell) => {
@@ -657,6 +659,7 @@ function userPlaceShip() {
               placementBoard.style.display = 'none';
               displayMsg(beginGameMsg);
 
+              titleWrapper.style.display = 'flex';
               humanBoard.style.display = 'grid';
               pcBoard.style.display = 'grid';
               displayShips(playerHumanPrefix, gbHuman);
